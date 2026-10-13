@@ -1,0 +1,6 @@
+# Shell scripts must keep LF endings even on Windows checkouts. The
+# PreToolUse git guardrail (.claude/hooks/block-dangerous-git.sh) runs under
+# bash; with CRLF endings it fails to execute, and because that hook fails
+# CLOSED a broken hook blocks every Bash command rather than none — which
+# would silently kill the unattended overnight runner.
+*.sh text eol=lf

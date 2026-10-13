@@ -1,0 +1,12 @@
+packages:
+  - apps/*
+  - packages/*
+  - e2e
+
+allowBuilds:
+  esbuild: true
+  msgpackr-extract: true
+
+onlyBuiltDependencies:
+  - esbuild
+  - msgpackr-extract

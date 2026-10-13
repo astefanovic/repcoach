@@ -1,0 +1,98 @@
+# Keeps the Agent SDK current so the Settings model picker's aliases ("Opus",
+# "Sonnet", "Haiku") keep resolving to the newest model in each family. The SDK
+# owns that mapping; see docs/ops/repcoach-server.md → *Models*.
+#
+# Weekly: bump to the newest SDK release that is at least a day old
+# (thin-client/scripts/bump-agent-sdk.mjs), run the automated rungs that
+# don't need a browser on the phone — typecheck, vitest, and the @agents
+# replay specs that drive the real agent adapters — and, if all pass, commit
+# straight to master. There is no PR: repo settings keep GITHUB_TOKEN from
+# opening one, and there's no other CI to gate it.
+#
+# Master moving does not move the running server; it runs from the main
+# checkout's node_modules. The bump rides along with the owner's next pull,
+# install and restart. Restarting is the owner's job, never automation's
+# (CLAUDE.md → *Testing & UAT*).
+#
+# `dry_run` (manual runs only) runs install + tests even when nothing is due,
+# and skips the commit. Use it to check the workflow itself.
+
+name: Agent SDK auto-update
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run install + tests, but don't commit"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: agent-sdk-update
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: thin-client
+    env:
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      # Matches the local toolchain; the lockfile and the minimumReleaseAge
+      # guard are both pnpm 11's.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.17.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: thin-client/pnpm-lock.yaml
+
+      - name: Pick the newest SDK release at least a day old
+        id: bump
+        run: node scripts/bump-agent-sdk.mjs
+
+      - name: Install
+        if: steps.bump.outputs.bumped == 'true' || env.DRY_RUN == 'true'
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Typecheck
+        if: steps.bump.outputs.bumped == 'true' || env.DRY_RUN == 'true'
+        run: pnpm exec tsc -b
+
+      - name: Unit and integration tests
+        if: steps.bump.outputs.bumped == 'true' || env.DRY_RUN == 'true'
+        run: pnpm test
+
+      - name: Agent replay specs (@agents)
+        if: steps.bump.outputs.bumped == 'true' || env.DRY_RUN == 'true'
+        env:
+          REPCOACH_AGENT_MODE: replay
+        run: |
+          pnpm --filter @repcoach/e2e exec playwright install --with-deps chromium
+          pnpm --filter @repcoach/e2e test --grep '@agents'
+
+      - name: Commit to master
+        if: steps.bump.outputs.bumped == 'true' && env.DRY_RUN != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/dev-server/package.json pnpm-lock.yaml pnpm-workspace.yaml
+          git commit -m "Bump Agent SDK ${{ steps.bump.outputs.current }} -> ${{ steps.bump.outputs.target }}" \
+            -m "Automated by .github/workflows/agent-sdk-update.yml after typecheck, vitest and the @agents replay specs passed."
+          git push origin HEAD:master
+

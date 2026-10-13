@@ -1,0 +1,19 @@
+{
+  "stage": "sweep",
+  "recordedAt": "2026-08-07T00:00:00.000Z",
+  "promptFingerprint": "sha256:dbd0697c6e84a7b0",
+  "provenance": "hand-seeded from the live-session deviations recorded in docs/ops/repcoach-server.md (issue #93) — not a verbatim recording; see README.md",
+  "turns": [
+    {
+      "prompt": "(hand-seeded) the deliberator's draft, serialized, plus the sweep instructions",
+      "reply": "{\n  \"decisions\": [\n    {\n      \"kind\": \"proposal\",\n      \"summary\": \"Add a fourth working set to Bench Press\",\n      \"rationale\": \"Every working set has reached the top of the prescribed range for two sessions running, and the last session's fourth-set-equivalent volume was absorbed without a rep drop.\",\n      \"citations\": [\n        {\n          \"claim\": \"Adding a set is the lowest-risk progression once the top of the rep range is reached at every set.\",\n          \"source_url\": \"https://pubmed.ncbi.nlm.nih.gov/28834797/\",\n          \"trust\": \"corpus-verified\"\n        }\n      ],\n      \"measurements\": [\n        {\n          \"label\": \"Bench Press, reps at top of range\",\n          \"series\": \"8, 8, 8 of 8\",\n          \"delta\": \"3/3\"\n        },\n        {\n          \"label\": \"e1RM, bench\",\n          \"series\": \"72.5 → 75.0 kg\",\n          \"delta\": \"+3.4%\"\n        }\n      ],\n      \"rule\": \"Double progression — advance volume once every working set reaches the top of the prescribed rep range.\",\n      \"uncertainty\": \"Your last session's third set finished at RPE 9. If the fourth set pushes the third one below 8 reps, this is early.\",\n      \"plan_operations\": [\n        {\n          \"_tag\": \"replaceEntrySets\",\n          \"entryId\": \"entry-bench-press\",\n          \"sets\": [\n            {\n              \"id\": \"set-bench-1\",\n              \"setType\": \"working\",\n              \"target\": {\n                \"reps\": {\n                  \"min\": 6,\n                  \"max\": 8\n                },\n                \"load\": {\n                  \"min\": 60,\n                  \"max\": 60\n                }\n              },\n              \"restSec\": 120\n            },\n            {\n              \"id\": \"set-bench-2\",\n              \"setType\": \"working\",\n              \"target\": {\n                \"reps\": {\n                  \"min\": 6,\n                  \"max\": 8\n                },\n                \"load\": {\n                  \"min\": 60,\n                  \"max\": 60\n                }\n              },\n              \"restSec\": 120\n            },\n            {\n              \"id\": \"set-bench-3\",\n              \"setType\": \"working\",\n              \"target\": {\n                \"reps\": {\n                  \"min\": 6,\n                  \"max\": 8\n                },\n                \"load\": {\n                  \"min\": 60,\n                  \"max\": 60\n                }\n              },\n              \"restSec\": 120\n            },\n            {\n              \"id\": \"set-bench-4\",\n              \"setType\": \"working\",\n              \"target\": {\n                \"reps\": {\n                  \"min\": 6,\n                  \"max\": 8\n                },\n                \"load\": {\n                  \"min\": 60,\n                  \"max\": 60\n                }\n              },\n              \"restSec\": 120\n            }\n          ]\n        }\n      ],\n      \"reasoning_only_points\": []\n    }\n  ],\n  \"observation_directives\": []\n}",
+      "usage": {
+        "input": 5400,
+        "output": 700,
+        "cacheRead": 0,
+        "cacheCreation": 0
+      },
+      "costUsd": 0
+    }
+  ]
+}

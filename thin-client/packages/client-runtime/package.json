@@ -1,0 +1,23 @@
+{
+  "name": "@repcoach/client-runtime",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./plan": {
+      "types": "./src/plan/index.ts",
+      "default": "./src/plan/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -b --force"
+  },
+  "dependencies": {
+    "@repcoach/contracts": "workspace:*",
+    "effect": "4.0.0-beta.78"
+  }
+}

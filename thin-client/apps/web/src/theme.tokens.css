@@ -1,0 +1,203 @@
+/* ---------------------------------------------------------------------------
+   RepCoach design tokens — the settled artifact of issue #43.
+
+   This is the direction chosen from the prototype: "Clipboard, showing its
+   working". Paper-and-ink chrome (hairlines, no cards, no elevation, mono
+   numerals) carrying an evidence-forward presentation of coach output.
+
+   Rules this file exists to enforce:
+
+   1. Names are SEMANTIC, never literal. --color-surface, not --color-gray-100.
+      That discipline is the entire reason dark mode costs one override block
+      rather than an audit of every component.
+
+   2. Utilities bind ONCE, in @theme, to runtime vars. Scheme switching happens
+      by reassigning --v-*, so no utility class is ever scheme-aware and no
+      component branches on light/dark.
+
+   3. prefers-color-scheme only. No manual toggle (issue #48).
+
+   4. Colour carries meaning, and the meaning is the same on every surface:
+
+        confirm    (green)   done, verified, healthy, go
+        deviation  (yellow)  caution, uncertainty, deviated from prescription
+        accent     (red)     the coach's proposed change
+        danger     (red)     a hard failure — broken, not degraded
+
+      Red is deliberately scarce. On Today it marks exactly two things: the
+      [PROPOSAL] tag and its Accept button. Evidence is never red — a
+      measurement that supports the coach reads green, one that undercuts it
+      reads yellow, and the reader can tell the difference at a glance.
+
+      `danger` is the second red, and issue #111 is why it earned a place on
+      the status strip: a client whose bundle had drifted from its server
+      failed every Intake in *yellow*, indistinguishable from being offline,
+      while each attempt billed a live agent run. Yellow says "expected, it
+      will pass"; danger says "broken, and continuing costs you something".
+      Two reds is a real cost — they must never sit in the same glance, and
+      they do not: `accent` lives on coach output, `danger` on chrome.
+
+   5. --spacing-tap is the floor for anything tapped mid-workout. Gym context
+      is one-handed, glanceable, possibly sweaty; legibility and hit-area beat
+      prettiness.
+
+   Replaces the prototype's [data-variant] blocks in src/theme.css — the losing
+   directions live on the prototype branch, not here.
+--------------------------------------------------------------------------- */
+
+@import "tailwindcss";
+
+@theme {
+  --color-canvas: var(--v-canvas);
+  --color-surface: var(--v-surface);
+  --color-surface-sunken: var(--v-surface-sunken);
+  --color-surface-raised: var(--v-surface-raised);
+
+  --color-border: var(--v-border);
+  --color-border-strong: var(--v-border-strong);
+
+  --color-text: var(--v-text);
+  --color-text-muted: var(--v-text-muted);
+  --color-text-faint: var(--v-text-faint);
+  /** unfilled prescription showing through a set row */
+  --color-text-ghost: var(--v-text-ghost);
+
+  --color-accent: var(--v-accent);
+  --color-accent-quiet: var(--v-accent-quiet);
+  --color-on-accent: var(--v-on-accent);
+
+  --color-confirm: var(--v-confirm);
+  --color-confirm-quiet: var(--v-confirm-quiet);
+  --color-deviation: var(--v-deviation);
+  --color-deviation-quiet: var(--v-deviation-quiet);
+  --color-danger: var(--v-danger);
+  /** the quiet field behind danger text — the status strip's red state (#111) */
+  --color-danger-quiet: var(--v-danger-quiet);
+
+  /** citation trust: corpus-verified vs retrieved-unverified */
+  --color-evidence-strong: var(--v-evidence-strong);
+  --color-evidence-weak: var(--v-evidence-weak);
+
+  --font-sans: var(--v-font-sans);
+  --font-display: var(--v-font-display);
+  /** tabular numerals — a column of loads must read as a column */
+  --font-numeric: var(--v-font-numeric);
+
+  --radius-control: var(--v-radius-control);
+  --radius-panel: var(--v-radius-panel);
+  --shadow-panel: var(--v-shadow-panel);
+
+  /** minimum comfortable tap target, one-handed, mid-set */
+  --spacing-tap: 3rem;
+}
+
+:root {
+  --v-canvas: oklch(0.97 0.004 95);
+  --v-surface: oklch(1 0 0);
+  --v-surface-sunken: oklch(0.94 0.005 95);
+  --v-surface-raised: oklch(1 0 0);
+  --v-border: oklch(0.87 0.006 95);
+  --v-border-strong: oklch(0.28 0.01 95);
+  --v-text: oklch(0.22 0.012 90);
+  --v-text-muted: oklch(0.48 0.01 90);
+  /** L tuned for 4.5:1 (WCAG AA normal text) against both --color-canvas and
+      --color-surface — issue #59's audit found the previous value (0.63)
+      landed at 3.21:1, failing AA at the small sizes this token is used at. */
+  --v-text-faint: oklch(0.55 0.008 90);
+  /** deliberately the faintest text token (unfilled prescription showing
+      through a set row) but still tuned for >=3:1 against canvas/surface —
+      issue #59: "deliberately low, but it must stay readable". Previous
+      value (0.74) was 2.11:1, below even the large-text floor. */
+  --v-text-ghost: oklch(0.63 0.008 90);
+  --v-accent: oklch(0.52 0.19 28);
+  --v-accent-quiet: oklch(0.94 0.04 28);
+  --v-on-accent: oklch(0.99 0 0);
+  --v-confirm: oklch(0.44 0.09 155);
+  --v-confirm-quiet: oklch(0.93 0.04 155);
+  --v-deviation: oklch(0.5 0.13 60);
+  --v-deviation-quiet: oklch(0.94 0.05 75);
+  --v-danger: oklch(0.5 0.2 25);
+  /** L/C deliberately mirror the --v-accent / --v-accent-quiet pair, which
+      issue #59's contrast audit already cleared at these values — a second red
+      that reads differently to the first would be the worst of both. */
+  --v-danger-quiet: oklch(0.94 0.04 25);
+  --v-evidence-strong: oklch(0.44 0.09 155);
+  --v-evidence-weak: oklch(0.55 0.03 90);
+
+  --v-font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --v-font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --v-font-numeric: ui-monospace, "SF Mono", "Cascadia Mono", monospace;
+
+  --v-radius-control: 0.25rem;
+  --v-radius-panel: 0.25rem;
+  --v-shadow-panel: none;
+}
+
+/* The document's own base. Tailwind's preflight binds --font-sans here but
+   never binds a text colour, so without this every element that doesn't carry
+   an explicit token class inherits the browser default — black — and dark mode
+   renders black on near-black. Every surface relies on that inheritance (a
+   heading is `text-2xl font-semibold`, not `text-2xl text-text`), so this is
+   the one place the base pair has to be stated.
+
+   color-scheme is here for the same reason one level down: it is what makes
+   native controls — text inputs, scrollbars, focus rings — follow the scheme.
+   Tokens cannot reach inside a UA-rendered widget. */
+html {
+  background-color: var(--v-canvas);
+  color: var(--v-text);
+  color-scheme: light dark;
+}
+
+/* No focus styling existed anywhere in this codebase before issue #59's audit —
+   every interactive control relied on the UA default, which several browsers
+   suppress entirely on non-`:focus-visible`-aware paths. --color-border-strong
+   is used rather than --color-accent because the ring must stay legible when
+   the focused control's own background IS the accent colour (e.g. the
+   [PROPOSAL] Accept button); border-strong sits at the "ink" extreme of the
+   scheme in both light and dark, so it reads against canvas, surface, and
+   accent alike. */
+:focus-visible {
+  outline: 2px solid var(--color-border-strong);
+  outline-offset: 2px;
+}
+
+/* prefers-reduced-motion (issue #59): decided once, here, rather than
+   retrofitted per-animation. Covers animate-pulse / animate-spin and the
+   width transitions on the set-completion and rest-timer bars. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --v-canvas: oklch(0.17 0.006 90);
+    --v-surface: oklch(0.22 0.007 90);
+    --v-surface-sunken: oklch(0.14 0.006 90);
+    --v-surface-raised: oklch(0.25 0.008 90);
+    --v-border: oklch(0.32 0.008 90);
+    --v-border-strong: oklch(0.72 0.01 90);
+    --v-text: oklch(0.95 0.005 90);
+    --v-text-muted: oklch(0.72 0.008 90);
+    --v-text-faint: oklch(0.61 0.008 90);
+    --v-text-ghost: oklch(0.53 0.008 90);
+    --v-accent: oklch(0.7 0.17 30);
+    --v-accent-quiet: oklch(0.29 0.07 30);
+    --v-on-accent: oklch(0.16 0.01 30);
+    --v-confirm: oklch(0.75 0.13 155);
+    --v-confirm-quiet: oklch(0.27 0.05 155);
+    --v-deviation: oklch(0.78 0.13 75);
+    --v-deviation-quiet: oklch(0.28 0.05 75);
+    --v-danger: oklch(0.68 0.18 25);
+    --v-danger-quiet: oklch(0.28 0.06 25);
+    --v-evidence-strong: oklch(0.75 0.13 155);
+    --v-evidence-weak: oklch(0.66 0.02 90);
+  }
+}

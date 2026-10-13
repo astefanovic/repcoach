@@ -1,0 +1,38 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "powershell.exe",
+      "runtimeArgs": [
+        "-NoProfile",
+        "-Command",
+        "& \"$env:APPDATA\\npm\\pnpm.cmd\" --dir thin-client/apps/web dev"
+      ],
+      "port": 5173
+    },
+    {
+      "comment": "Issue #93 commissioning: the PRODUCTION server (real Agent SDK agents, real quota) over a throwaway commissioning DB, serving the built web client. Never point this at the real ~/.repcoach/repcoach.sqlite.",
+      "name": "commissioning",
+      "runtimeExecutable": "powershell.exe",
+      "runtimeArgs": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "& ./scripts/Start-RepcoachServer.ps1 -Port 4031 -SkipTailscaleServe -DbPath (Join-Path $env:USERPROFILE '.repcoach\\commissioning.sqlite')"
+      ],
+      "port": 4031
+    },
+    {
+      "name": "dev-server",
+      "runtimeExecutable": "powershell.exe",
+      "runtimeArgs": [
+        "-NoProfile",
+        "-Command",
+        "& \"$env:APPDATA\\npm\\pnpm.cmd\" --dir thin-client/apps/dev-server dev"
+      ],
+      "port": 4010
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+name: Feature request
+description: Suggest something RepCoach should do.
+labels: ["needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you're trying to do
+      description: Describe the problem or the moment in a workout where you missed this, before the solution you have in mind.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you'd like
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else
+      description: Other apps that do this well, related issues, or the ADR this touches.

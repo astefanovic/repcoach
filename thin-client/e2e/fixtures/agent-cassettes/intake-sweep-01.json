@@ -1,0 +1,19 @@
+{
+  "stage": "intake-sweep",
+  "recordedAt": "2026-08-07T00:00:00.000Z",
+  "promptFingerprint": "sha256:066e081bbf567b25",
+  "provenance": "hand-seeded from the live-session deviations recorded in docs/ops/repcoach-server.md (issue #93) — not a verbatim recording; see README.md",
+  "turns": [
+    {
+      "prompt": "(hand-seeded) the plan, the justification and three citations to verify",
+      "reply": "{\n  \"verdicts\": [\n    {\n      \"citationId\": \"ic1\",\n      \"claim\": \"Training a muscle twice a week beats once for hypertrophy at matched weekly volume.\",\n      \"source_url\": \"https://pubmed.ncbi.nlm.nih.gov/27102172/\",\n      \"outcome\": \"corpus-verified\"\n    },\n    {\n      \"citationId\": \"ic2\",\n      \"claim\": \"Two full-body days a week is enough for a beginner to keep growing indefinitely.\",\n      \"source_url\": \"https://example.com/blog/lifting-twice-a-week\",\n      \"outcome\": \"removed\",\n      \"why\": \"the claim traces to a blog post citing itself, which does not clear the source bar\"\n    },\n    {\n      \"citationId\": \"ic3\",\n      \"claim\": \"Adding load once the top of the prescribed rep range is reached is the simplest workable progression.\",\n      \"source_url\": \"https://example.com/retrieved/progression-primer\",\n      \"outcome\": \"retrieved-unverified\"\n    }\n  ],\n  \"rationale\": [\n    {\n      \"text\": \"Four days lets every muscle be trained twice a week.\",\n      \"citationId\": \"ic1\"\n    },\n    {\n      \"text\": \"Leg press instead of back squat keeps the quads loaded off your spine.\",\n      \"citationId\": \"ic3\"\n    },\n    {\n      \"text\": \"Two days would also work, but leaves less room to add volume later.\",\n      \"citationId\": null\n    }\n  ]\n}",
+      "usage": {
+        "input": 4100,
+        "output": 900,
+        "cacheRead": 0,
+        "cacheCreation": 0
+      },
+      "costUsd": 0
+    }
+  ]
+}

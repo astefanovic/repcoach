@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+@keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+@keyframes slideUp { from{transform:translateY(8px);opacity:0} to{transform:translateY(0);opacity:1} }
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { margin:0; }
+::-webkit-scrollbar { display:none; }
+</style>
+</helmet>
+
+<template id="__bundler_thumbnail" data-bg-color="#1C1A18">
+  <svg viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg">
+    <!-- Phone body -->
+    <rect x="60" y="60" width="270" height="724" rx="44" fill="#F5F0E8"/>
+    <!-- Status bar notch area -->
+    <rect x="60" y="60" width="270" height="80" rx="44" fill="#F5F0E8"/>
+    <!-- Calendar card -->
+    <rect x="100" y="200" width="190" height="160" rx="16" fill="#FFFFFF"/>
+    <!-- Calendar header bar -->
+    <rect x="100" y="200" width="190" height="36" rx="16" fill="#9B6B42" fill-opacity="0.15"/>
+    <rect x="100" y="220" width="190" height="16" fill="#9B6B42" fill-opacity="0.15"/>
+    <!-- Calendar rows of dots -->
+    <circle cx="127" cy="278" r="8" fill="#9B6B42"/>
+    <circle cx="154" cy="278" r="5" fill="#F5EDE4"/>
+    <circle cx="181" cy="278" r="8" fill="#F5EDE4"/>
+    <circle cx="208" cy="278" r="5" fill="#F5EDE4"/>
+    <circle cx="235" cy="278" r="8" fill="#F5EDE4"/>
+    <circle cx="262" cy="278" r="8" fill="#F5EDE4"/>
+    <circle cx="289" cy="278" r="5" fill="#F5EDE4"/>
+    <!-- Progress bar -->
+    <rect x="116" y="320" width="158" height="6" rx="3" fill="#EDE8E0"/>
+    <rect x="116" y="320" width="79" height="6" rx="3" fill="#9B6B42"/>
+    <!-- Goal card -->
+    <rect x="100" y="390" width="190" height="90" rx="14" fill="#FFFFFF"/>
+    <rect x="116" y="408" width="60" height="8" rx="4" fill="#9B6B42" fill-opacity="0.4"/>
+    <rect x="116" y="426" width="130" height="10" rx="4" fill="#1A1714" fill-opacity="0.15"/>
+    <rect x="116" y="444" width="90" height="7" rx="3" fill="#1A1714" fill-opacity="0.07"/>
+    <!-- Constraints card -->
+    <rect x="100" y="500" width="190" height="120" rx="14" fill="#FFFFFF"/>
+    <rect x="116" y="518" width="55" height="7" rx="3" fill="#9B6B42" fill-opacity="0.4"/>
+    <rect x="116" y="540" width="30" height="18" rx="4" fill="#2A2320"/>
+    <rect x="154" y="544" width="100" height="10" rx="4" fill="#1A1714" fill-opacity="0.12"/>
+    <rect x="116" y="568" width="30" height="18" rx="4" fill="#EDE8E0"/>
+    <rect x="154" y="572" width="85" height="10" rx="4" fill="#1A1714" fill-opacity="0.12"/>
+    <rect x="116" y="596" width="30" height="18" rx="4" fill="#EDE8E0"/>
+    <rect x="154" y="600" width="110" height="10" rx="4" fill="#1A1714" fill-opacity="0.12"/>
+    <!-- Bottom nav -->
+    <rect x="60" y="724" width="270" height="80" rx="0" fill="#FFFFFF"/>
+    <rect x="60" y="744" width="270" height="1" fill="#EDE8E0"/>
+    <!-- Nav dots -->
+    <circle cx="141" cy="775" r="5" fill="#B0A69C"/>
+    <circle cx="195" cy="775" r="6" fill="#9B6B42"/>
+    <circle cx="249" cy="775" r="5" fill="#B0A69C"/>
+    <rect x="60" y="760" width="270" height="64" rx="0" fill="none"/>
+  </svg>
+</template>
+
+<div style="min-height:100vh;background:#1C1A18;display:flex;align-items:center;justify-content:center;padding:20px;font-family:'DM Sans',system-ui,sans-serif;">
+
+  <!-- Phone frame -->
+  <div style="width:390px;height:844px;background:#F5F0E8;border-radius:44px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 28px 70px rgba(0,0,0,0.65),0 0 0 1px rgba(255,255,255,0.06);">
+
+    <!-- Status bar -->
+    <div style="height:50px;padding:14px 28px 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:#F5F0E8;">
+      <span style="font:600 14px/1 'DM Sans',sans-serif;color:#1A1714;letter-spacing:0.01em;">9:41</span>
+      <div style="display:flex;gap:5px;align-items:center;">
+        <svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="5" width="3" height="7" rx="1" fill="#1A1714"/><rect x="4.5" y="3" width="3" height="9" rx="1" fill="#1A1714"/><rect x="9" y="1" width="3" height="11" rx="1" fill="#1A1714"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#1A1714" opacity="0.22"/></svg>
+        <div style="display:flex;align-items:center;">
+          <div style="width:24px;height:11px;border:1.5px solid rgba(26,23,20,0.45);border-radius:3px;padding:1.5px;display:flex;align-items:stretch;">
+            <div style="width:75%;background:#1A1714;border-radius:1px;"></div>
+          </div>
+          <div style="width:2px;height:5px;background:rgba(26,23,20,0.35);border-radius:0 1px 1px 0;margin-left:-1px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- App header -->
+    <div style="padding:6px 20px 8px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:#F5F0E8;">
+      <div style="font:500 18px/1 'Lora',serif;color:#1A1714;letter-spacing:-0.01em;">RepCoach</div>
+      <div style="width:22px;"></div>
+    </div>
+
+    <!-- Scrollable content -->
+    <div style="flex:1;overflow-y:auto;overflow-x:hidden;">
+
+      <!-- Page heading -->
+      <div style="padding:10px 20px 14px;">
+        <div style="font:600 23px/1.2 'DM Sans',sans-serif;color:#1A1714;letter-spacing:-0.01em;">Plan</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;">
+          <span style="font:400 13px/1 'DM Sans',sans-serif;color:#7A6F66;">Block periodization</span>
+          <span style="width:3px;height:3px;border-radius:50%;background:#C0B8AF;display:inline-block;"></span>
+          <span style="font:400 13px/1 'DM Sans',sans-serif;color:#7A6F66;">Accumulation · Week 3 of 6</span>
+        </div>
+      </div>
+
+      <!-- ── PLAN CARD ── -->
+      <div style="margin:0 16px 12px;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06),0 0 0 1px rgba(0,0,0,0.03);">
+
+        <!-- Weekly split -->
+        <div style="padding:14px 16px 12px;border-bottom:1px solid #F5F0E8;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font:600 11px/1 'DM Sans',sans-serif;color:#9B8C7E;letter-spacing:0.08em;text-transform:uppercase;">This week</div>
+            <div style="font:400 12px 'DM Sans',sans-serif;color:#9B6B42;">28 Jun – 4 Jul</div>
+          </div>
+
+          <!-- 7-day grid -->
+          <div style="display:flex;gap:3px;">
+            <sc-for list="{{ days }}" as="day" hint-placeholder-count="7">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;">
+                <span style="{{ day.letterStyle }}">{{ day.letter }}</span>
+                <div style="{{ day.dotStyle }}">
+                  <span style="{{ day.abbrStyle }}">{{ day.abbr }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- Cycle progress bar -->
+        <div style="padding:12px 16px 14px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;">
+            <div style="font:400 13px 'DM Sans',sans-serif;color:#1A1714;">Accumulation phase</div>
+            <div style="font:600 12px 'DM Sans',sans-serif;color:#9B6B42;">Week 3 / 6</div>
+          </div>
+          <div style="height:4px;background:#EDE8E0;border-radius:2px;overflow:hidden;margin-bottom:6px;">
+            <div style="width:50%;height:100%;background:#9B6B42;border-radius:2px;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <div style="font:400 11px 'DM Sans',sans-serif;color:#B0A497;">Deload scheduled · week 6</div>
+            <div style="font:400 11px 'DM Sans',sans-serif;color:#B0A497;">4× / week</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── PENDING PLAN PROPOSAL ── -->
+      <sc-if value="{{ showProposal }}" hint-placeholder-val="{{ true }}">
+        <div style="margin:0 16px 12px;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06),0 0 0 1px rgba(0,0,0,0.03);border-left:3px solid #C05535;animation:fadeIn 0.2s ease;">
+          <div style="padding:14px 16px 14px;">
+
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <div style="font:500 13px/1.3 'DM Sans',sans-serif;color:#1A1714;flex:1;margin-right:10px;">Reduce chest accessory volume</div>
+              <span style="background:#FDECEA;color:#C05535;padding:3px 8px;border-radius:20px;font:500 11px 'DM Sans',sans-serif;flex-shrink:0;white-space:nowrap;">Proposal</span>
+            </div>
+
+            <div style="font:400 12px/1.6 'Lora',serif;color:#3A3028;font-style:italic;margin-bottom:10px;">Weekly chest sets (18) at upper end of MRV landmark. Reducing Cable Fly creates recovery headroom for Bench progression rule to keep firing.</div>
+
+            <!-- Diff -->
+            <div style="background:#F9F5EF;border-radius:10px;padding:10px 12px;margin-bottom:10px;">
+              <div style="font:600 10px 'DM Sans',sans-serif;color:#9B8C7E;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Change</div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:3px;">
+                <span style="font:500 13px 'DM Sans',sans-serif;color:#1A1714;">Cable Fly</span>
+                <span style="font:400 11px 'DM Sans',sans-serif;color:#B0A497;letter-spacing:0.04em;">Chest</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font:400 12px 'DM Sans',sans-serif;color:#B0A497;text-decoration:line-through;">3 × 12–15 · 15 kg</span>
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M1 5h10M8 1.5l4 3.5-4 3.5" stroke="#9B6B42" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span style="font:600 12px 'DM Sans',sans-serif;color:#1A1714;">2 × 12–15 · 15 kg</span>
+              </div>
+            </div>
+
+            <!-- Citation -->
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:11px;">
+              <span style="background:#ECF3E9;color:#2D5A22;padding:2px 6px;border-radius:4px;font:600 10px 'DM Sans',sans-serif;">✓ corpus</span>
+              <span style="font:400 11px 'DM Sans',sans-serif;color:#9B8C7E;">Israetel et al. 2019 · MRV landmarks</span>
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex;gap:7px;">
+              <button onClick="{{ acceptProposal }}" style="flex:1;background:#1A1714;color:#F5F0E8;border:none;border-radius:10px;padding:11px;font:600 13px 'DM Sans',sans-serif;cursor:pointer;">Accept</button>
+              <button style="background:#F0EBE3;color:#1A1714;border:none;border-radius:10px;padding:11px 13px;font:400 12px 'DM Sans',sans-serif;cursor:pointer;">Why?</button>
+              <button onClick="{{ dismissProposal }}" style="background:#F0EBE3;color:#6B5F55;border:none;border-radius:10px;padding:11px 13px;font:400 12px 'DM Sans',sans-serif;cursor:pointer;">Dismiss</button>
+            </div>
+
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Accepted badge -->
+      <sc-if value="{{ proposalAccepted }}" hint-placeholder-val="{{ false }}">
+        <div style="margin:0 16px 12px;background:#E5F2DE;border-radius:10px;padding:8px 14px;display:flex;align-items:center;gap:8px;animation:slideUp 0.2s ease;">
+          <svg width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1 4.8l3.5 3.5L12 1" stroke="#2D5A22" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font:400 12px/1 'DM Sans',sans-serif;color:#2D5A22;">Plan updated · Cable Fly reduced to 2 sets from next session</span>
+        </div>
+      </sc-if>
+
+      <!-- ── GOAL CARD ── -->
+      <div style="margin:0 16px 12px;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06),0 0 0 1px rgba(0,0,0,0.03);">
+        <div style="padding:14px 16px;">
+
+          <div style="font:600 11px/1 'DM Sans',sans-serif;color:#9B6B42;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Goal</div>
+
+          <div style="font:500 15px/1.4 'Lora',serif;color:#1A1714;margin-bottom:3px;">Hypertrophy — add lean mass</div>
+          <div style="font:400 12px 'DM Sans',sans-serif;color:#7A6F66;margin-bottom:14px;">+5 kg lean mass target · by Dec 2025</div>
+
+          <div style="height:1px;background:#F0EBE3;margin-bottom:12px;"></div>
+
+          <div style="font:600 10px 'DM Sans',sans-serif;color:#B0A497;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:9px;">Proxies the coach tracks</div>
+
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:6px;height:6px;border-radius:50%;background:#9B6B42;flex-shrink:0;"></div>
+                <span style="font:400 13px 'DM Sans',sans-serif;color:#1A1714;">e1RM — upper body lifts</span>
+              </div>
+              <span style="font:600 12px 'DM Sans',sans-serif;color:#9B6B42;">↑ +4.2%</span>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:6px;height:6px;border-radius:50%;background:#9B6B42;flex-shrink:0;"></div>
+                <span style="font:400 13px 'DM Sans',sans-serif;color:#1A1714;">Weekly sets vs. MRV landmarks</span>
+              </div>
+              <span style="font:400 12px 'DM Sans',sans-serif;color:#7A6F66;">On track</span>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:6px;height:6px;border-radius:50%;background:#DDD6CC;flex-shrink:0;"></div>
+                <span style="font:400 13px 'DM Sans',sans-serif;color:#1A1714;">Bodyweight trend</span>
+              </div>
+              <span style="font:400 12px 'DM Sans',sans-serif;color:#B0A497;">No data yet</span>
+            </div>
+
+          </div>
+
+          <div style="background:#FEFCF8;border-radius:9px;padding:9px 12px;border-left:2px solid #E2D4C5;">
+            <div style="font:400 11px/1.55 'Lora',serif;color:#7A6F66;font-style:italic;">These are proxies for hypertrophy, not direct measurement. The coach reasons from trends and evidence-based landmarks — not direct observation.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── STANDING CONSTRAINTS ── -->
+      <div style="margin:0 16px 12px;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06),0 0 0 1px rgba(0,0,0,0.03);">
+        <div style="padding:14px 16px 0;">
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font:600 11px/1 'DM Sans',sans-serif;color:#9B6B42;letter-spacing:0.08em;text-transform:uppercase;">Standing constraints</div>
+            <button style="background:#F5EDE4;color:#9B6B42;border:none;border-radius:7px;padding:5px 10px;font:600 11px 'DM Sans',sans-serif;cursor:pointer;">+ Add</button>
+          </div>
+
+          <sc-for list="{{ constraints }}" as="c" hint-placeholder-count="4">
+            <div style="border-top:1px solid #F5F0E8;">
+
+              <!-- Row header -->
+              <button onClick="{{ c.toggle }}" style="width:100%;background:none;border:none;padding:11px 0;display:flex;align-items:center;gap:9px;cursor:pointer;text-align:left;outline:none;">
+                <span style="{{ c.chipStyle }}">{{ c.typeLabel }}</span>
+                <span style="flex:1;font:400 13px/1.3 'DM Sans',sans-serif;color:#1A1714;">{{ c.text }}</span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="{{ c.chevronStyle }}"><path d="M3 4.5L6 7.5L9 4.5" stroke="#B0A497" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+
+              <!-- Expanded detail -->
+              <sc-if value="{{ c.expanded }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:0 0 12px;animation:slideUp 0.15s ease;">
+                  <div style="background:#F9F5EF;border-radius:9px;padding:10px 12px;margin-bottom:8px;">
+                    <div style="font:400 12px/1.55 'DM Sans',sans-serif;color:#4A4039;margin-bottom:6px;">{{ c.detail }}</div>
+                    <div style="font:600 10px 'DM Sans',sans-serif;color:#B0A497;letter-spacing:0.07em;text-transform:uppercase;">{{ c.source }}</div>
+                  </div>
+
+                  <!-- Coach-proposed promotion (soft → hard) -->
+                  <sc-if value="{{ c.hasPromotion }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:#FEF7F5;border-radius:9px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;">
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;margin-top:1px;"><circle cx="7" cy="7" r="6" stroke="#C05535" stroke-width="1.2"/><path d="M7 4v3.5M7 9.5v.5" stroke="#C05535" stroke-width="1.3" stroke-linecap="round"/></svg>
+                      <div style="flex:1;">
+                        <div style="font:500 12px/1.3 'DM Sans',sans-serif;color:#C05535;margin-bottom:2px;">Coach proposes: make this a hard constraint</div>
+                        <div style="font:400 11px/1.4 'DM Sans',sans-serif;color:#9B6B42;margin-bottom:7px;">Pattern detected — 3 sessions where squats were avoided or substituted.</div>
+                        <div style="display:flex;gap:6px;">
+                          <button style="background:#C05535;color:#FFFFFF;border:none;border-radius:7px;padding:5px 11px;font:600 11px 'DM Sans',sans-serif;cursor:pointer;">Upgrade to hard</button>
+                          <button onClick="{{ dismissPromotion }}" style="background:#F0EBE3;color:#6B5F55;border:none;border-radius:7px;padding:5px 10px;font:400 11px 'DM Sans',sans-serif;cursor:pointer;">Not now</button>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+
+            </div>
+          </sc-for>
+
+        </div>
+
+        <!-- Footer note -->
+        <div style="padding:10px 16px 14px;border-top:1px solid #F5F0E8;">
+          <div style="font:400 11px/1.5 'DM Sans',sans-serif;color:#B0A497;"><span style="font-weight:600;color:#2A2320;">Hard</span> constraints are inviolable. <span style="font-weight:500;color:#7A6F66;">Soft</span> constraints can be challenged by the coach with evidence — any change is raised as a Proposal first.</div>
+        </div>
+
+      </div>
+
+      <div style="height:80px;"></div>
+    </div>
+    <!-- END SCROLL -->
+
+    <!-- Bottom nav -->
+    <div style="height:80px;background:#FFFFFF;border-top:1px solid #EDE8E0;display:flex;align-items:flex-start;padding-top:10px;flex-shrink:0;">
+
+      <!-- Today -->
+      <div onClick="{{ goHome }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 9.5L11 3l8 6.5V19a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="#B0A69C" stroke-width="1.5" fill="none"/><rect x="8" y="12" width="6" height="7" rx="1" fill="#B0A69C" opacity="0.4"/></svg>
+        <span style="font:400 10px 'DM Sans',sans-serif;color:#B0A69C;">Today</span>
+      </div>
+
+      <!-- Feed -->
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 6h14M4 10h10M4 14h6" stroke="#B0A69C" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span style="font:400 10px 'DM Sans',sans-serif;color:#B0A69C;">Feed</span>
+      </div>
+
+      <!-- Plan (active) -->
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="15" rx="2" fill="#9B6B42" fill-opacity="0.12" stroke="#9B6B42" stroke-width="1.5"/><path d="M7 4V2M15 4V2M3 9h16" stroke="#9B6B42" stroke-width="1.5" stroke-linecap="round"/><path d="M7 13h2M13 13h2M7 16h2" stroke="#9B6B42" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span style="font:600 10px 'DM Sans',sans-serif;color:#9B6B42;">Plan</span>
+      </div>
+
+      <!-- Progress -->
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 17L8 11l4 3 4-6 3 4" stroke="#B0A69C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font:400 10px 'DM Sans',sans-serif;color:#B0A69C;">Progress</span>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 430, &quot;height&quot;: 900 }
+}">
+
+class Component extends DCLogic {
+  state = {
+    expandedConstraint: null,
+    dismissedProposal: false,
+    acceptedProposal: false,
+    promotionDismissed: false,
+  };
+
+  renderVals() {
+    const s = this.state;
+
+    // ── Week grid ──
+    const WEEK = [
+      { letter: 'M', session: 'Upper A', abbr: 'Up\u00A0A', isToday: true  },
+      { letter: 'T', session: null,       abbr: '',          isToday: false },
+      { letter: 'W', session: 'Lower A', abbr: 'Lo\u00A0A', isToday: false },
+      { letter: 'T', session: null,       abbr: '',          isToday: false },
+      { letter: 'F', session: 'Upper B', abbr: 'Up\u00A0B', isToday: false },
+      { letter: 'S', session: 'Lower B', abbr: 'Lo\u00A0B', isToday: false },
+      { letter: 'S', session: null,       abbr: '',          isToday: false },
+    ];
+
+    const days = WEEK.map(d => ({
+      letter: d.letter,
+      abbr: d.abbr,
+      letterStyle: {
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: '11px',
+        fontWeight: d.isToday ? '700' : '400',
+        color: d.isToday ? '#9B6B42' : '#B0A497',
+      },
+      dotStyle: {
+        width: '36px',
+        height: '36px',
+        borderRadius: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: d.isToday ? '#9B6B42' : d.session ? '#F5EDE4' : 'transparent',
+        border: !d.isToday && !d.session ? '1.5px dashed #DDD6CC' : 'none',
+      },
+      abbrStyle: {
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: '8.5px',
+        fontWeight: '700',
+        letterSpacing: '0.02em',
+        color: d.isToday ? '#FFFFFF' : d.session ? '#9B6B42' : 'transparent',
+        textAlign: 'center',
+        lineHeight: '1.2',
+        whiteSpace: 'pre',
+      },
+    }));
+
+    // ── Constraints ──
+    const CONSTRAINTS = [
+      {
+        id: 'c1',
+        type: 'hard',
+        typeLabel: 'HARD',
+        text: 'No overhead pressing',
+        detail: 'Left shoulder impingement. All overhead press variants are excluded. Lateral raises and face pulls remain permitted.',
+        source: 'Injury',
+        hasPromotion: false,
+      },
+      {
+        id: 'c2',
+        type: 'hard',
+        typeLabel: 'HARD',
+        text: 'Max 4 sessions / week',
+        detail: 'Schedule limit. The coach cannot prescribe more than 4 sessions in any rolling 7-day window.',
+        source: 'Schedule',
+        hasPromotion: false,
+      },
+      {
+        id: 'c3',
+        type: 'soft',
+        typeLabel: 'SOFT',
+        text: 'Avoid barbell squats',
+        detail: 'Knee discomfort under load. Leg press and hack squat are substituted. The coach may challenge this with evidence if a squat variant is significantly beneficial — any change is raised as a Proposal.',
+        source: 'Discomfort',
+        hasPromotion: !s.promotionDismissed,
+      },
+      {
+        id: 'c4',
+        type: 'soft',
+        typeLabel: 'SOFT',
+        text: 'Morning sessions preferred',
+        detail: 'Lifestyle preference. The coach will schedule sessions in the morning window when structuring the week.',
+        source: 'Preference',
+        hasPromotion: false,
+      },
+    ];
+
+    const constraints = CONSTRAINTS.map(c => ({
+      ...c,
+      expanded: s.expandedConstraint === c.id,
+      toggle: () => this.setState(st => ({
+        expandedConstraint: st.expandedConstraint === c.id ? null : c.id,
+      })),
+      chipStyle: c.type === 'hard' ? {
+        background: '#2A2320',
+        color: '#F5EDE4',
+        padding: '2px 6px',
+        borderRadius: '4px',
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: '9px',
+        fontWeight: '700',
+        letterSpacing: '0.07em',
+        flexShrink: '0',
+        whiteSpace: 'nowrap',
+      } : {
+        background: '#EDE8E0',
+        color: '#7A6F66',
+        padding: '2px 6px',
+        borderRadius: '4px',
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: '9px',
+        fontWeight: '700',
+        letterSpacing: '0.07em',
+        flexShrink: '0',
+        whiteSpace: 'nowrap',
+      },
+      chevronStyle: {
+        flexShrink: '0',
+        transform: s.expandedConstraint === c.id ? 'rotate(180deg)' : 'rotate(0deg)',
+        transition: 'transform 0.15s ease',
+      },
+    }));
+
+    return {
+      // Navigation
+      goHome: () => { window.location.href = 'Today.dc.html'; },
+
+      // Week grid
+      days,
+
+      // Proposal
+      showProposal: !s.dismissedProposal && !s.acceptedProposal,
+      proposalAccepted: s.acceptedProposal,
+      acceptProposal: () => this.setState({ acceptedProposal: true }),
+      dismissProposal: () => this.setState({ dismissedProposal: true }),
+
+      // Constraints
+      constraints,
+      dismissPromotion: () => this.setState({ promotionDismissed: true }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

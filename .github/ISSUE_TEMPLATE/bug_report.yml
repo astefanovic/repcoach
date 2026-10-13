@@ -1,0 +1,44 @@
+name: Bug report
+description: Something in the app or the server doesn't work as it should.
+labels: ["needs-triage"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start a workout from Today
+        2. ...
+  - type: input
+    id: device
+    attributes:
+      label: Phone and browser
+      placeholder: Pixel 7, Chrome 141
+  - type: input
+    id: server
+    attributes:
+      label: Server OS and Node version
+      placeholder: Windows 11, Node 22.16
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Logging
+        - Plan
+        - Coach (Intake, reviews, proposals)
+        - Server / self-hosting
+        - Other
+  - type: textarea
+    id: logs
+    attributes:
+      label: Server output
+      description: Anything relevant the server printed. Remove anything personal first.
+      render: text

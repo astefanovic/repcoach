@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes slideUp { from{transform:translateY(12px);opacity:0} to{transform:translateY(0);opacity:1} }
+@keyframes timerPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+@keyframes checkPop { 0%{transform:scale(0.4);opacity:0} 70%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { margin:0; }
+::-webkit-scrollbar { display:none; }
+</style>
+</helmet>
+
+<!-- Page -->
+<div style="min-height:100vh;background:#1C1A18;display:flex;align-items:center;justify-content:center;padding:20px;font-family:'DM Sans',system-ui,sans-serif;">
+
+  <!-- Prototype label -->
+  <div style="position:fixed;top:14px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.38);padding:4px 14px;border-radius:20px;font:400 11px 'DM Sans',sans-serif;letter-spacing:0.05em;pointer-events:none;z-index:100;white-space:nowrap;">
+    RepCoach · Workout screen · Use A / B toggle to compare logging variants
+  </div>
+
+  <!-- Phone frame -->
+  <div style="width:390px;height:844px;background:#F5F0E8;border-radius:44px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 28px 70px rgba(0,0,0,0.65),0 0 0 1px rgba(255,255,255,0.06);">
+
+    <!-- Status bar -->
+    <div style="height:50px;padding:14px 28px 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:#F5F0E8;">
+      <span style="font:600 14px/1 'DM Sans',sans-serif;color:#1A1714;letter-spacing:0.01em;">9:41</span>
+      <div style="display:flex;gap:5px;align-items:center;">
+        <svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="5" width="3" height="7" rx="1" fill="#1A1714"/><rect x="4.5" y="3" width="3" height="9" rx="1" fill="#1A1714"/><rect x="9" y="1" width="3" height="11" rx="1" fill="#1A1714"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#1A1714" opacity="0.22"/></svg>
+        <div style="display:flex;align-items:center;">
+          <div style="width:24px;height:11px;border:1.5px solid rgba(26,23,20,0.45);border-radius:3px;padding:1.5px;display:flex;align-items:stretch;">
+            <div style="width:75%;background:#1A1714;border-radius:1px;"></div>
+          </div>
+          <div style="width:2px;height:5px;background:rgba(26,23,20,0.35);border-radius:0 1px 1px 0;margin-left:-1px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content area -->
+    <div style="flex:1;position:relative;overflow:hidden;">
+
+      <!-- ══════════════════════════════
+           PRE PHASE — Session overview
+      ══════════════════════════════ -->
+      <sc-if value="{{ isPrePhase }}" hint-placeholder-val="{{ true }}">
+        <div style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;animation:fadeIn 0.2s ease;">
+
+          <!-- Header -->
+          <div style="padding:14px 20px 0;display:flex;justify-content:space-between;align-items:center;">
+            <button onClick="{{ goHome }}" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;gap:5px;color:#7A6F66;font:400 13px 'DM Sans',sans-serif;">
+              <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1.5L1.5 7 7 12.5" stroke="#7A6F66" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Today
+            </button>
+            <div style="font:600 14px/1 'DM Sans',sans-serif;color:#1A1714;">Upper A</div>
+            <div style="width:56px;"></div>
+          </div>
+
+          <!-- Title -->
+          <div style="padding:16px 20px 10px;">
+            <div style="font:600 22px/1.2 'DM Sans',sans-serif;color:#1A1714;letter-spacing:-0.01em;">Today's session</div>
+            <div style="font:400 13px/1 'DM Sans',sans-serif;color:#7A6F66;margin-top:5px;">Monday · 5 exercises · ~70 min</div>
+          </div>
+
+          <!-- Coaching note (expandable) -->
+          <div style="margin:0 16px 14px;background:#FEFCF8;border-radius:12px;border-left:3px solid #C0924E;overflow:hidden;">
+            <div onClick="{{ toggleAdvice }}" style="padding:12px 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;cursor:pointer;">
+              <div style="font:400 13px/1.6 'Lora',serif;color:#3A3028;font-style:italic;flex:1;">Progression rule active on Bench: if all reps hit, load increases +2.5 kg next session.</div>
+              <sc-if value="{{ adviceCollapsed }}" hint-placeholder-val="{{ true }}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:2px;"><circle cx="8" cy="8" r="6.5" stroke="#C0924E" stroke-width="1.2"/><path d="M8 5.5v5M5.5 8h5" stroke="#C0924E" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </sc-if>
+              <sc-if value="{{ adviceExpanded }}" hint-placeholder-val="{{ false }}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:2px;"><circle cx="8" cy="8" r="6.5" stroke="#C0924E" stroke-width="1.2"/><path d="M5.5 8h5" stroke="#C0924E" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </sc-if>
+            </div>
+            <sc-if value="{{ adviceExpanded }}" hint-placeholder-val="{{ false }}">
+              <div style="border-top:1px solid #EDE8E0;padding:12px 14px 14px;animation:slideUp 0.15s ease;">
+                <div style="font:600 10px 'DM Sans',sans-serif;color:#B0A497;letter-spacing:0.09em;text-transform:uppercase;margin-bottom:8px;">Evidence</div>
+                <div style="background:#F5F0E8;border-radius:8px;padding:10px 12px;margin-bottom:10px;">
+                  <div style="font:400 11px 'DM Sans',sans-serif;color:#7A6F66;margin-bottom:5px;">Bench e1RM — 5 sessions</div>
+                  <svg width="100%" height="40" viewBox="0 0 220 40" preserveAspectRatio="none">
+                    <path d="M 0,34 L 55,26 L 110,18 L 165,10 L 220,4" stroke="#9B6B42" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M 0,34 L 55,26 L 110,18 L 165,10 L 220,4 L 220,40 L 0,40 Z" fill="rgba(155,107,66,0.1)"/>
+                    <circle cx="220" cy="4" r="3" fill="#9B6B42"/>
+                  </svg>
+                  <div style="display:flex;justify-content:space-between;font:400 10px 'DM Sans',sans-serif;color:#B0A497;margin-top:3px;"><span>89.2 kg</span><span>93.0 kg (+4.2%)</span></div>
+                </div>
+                <div style="font:400 12px/1.6 'DM Sans',sans-serif;color:#4A4039;margin-bottom:8px;">e1RM +4.2% over 5 sessions — threshold is &gt;3% over ≥4. <strong style="font-weight:600;">Rule triggered.</strong> Plan unchanged today; load increases next session if all sets are hit.</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+                  <span style="background:#ECF3E9;color:#2D5A22;padding:2px 7px;border-radius:4px;font:600 10px 'DM Sans',sans-serif;">✓ corpus</span>
+                  <span style="font:400 11px 'DM Sans',sans-serif;color:#7A6F66;">Schoenfeld 2017 · Progressive overload</span>
+                </div>
+                <div style="border-top:1px solid #EDE8E0;padding-top:10px;">
+                  <div style="font:600 10px 'DM Sans',sans-serif;color:#B0A497;letter-spacing:0.09em;text-transform:uppercase;margin-bottom:6px;">Context note</div>
+                  <div style="font:400 11px/1.5 'DM Sans',sans-serif;color:#9B8C7E;margin-bottom:7px;">Tell your coach how you're feeling — feeds into tonight's session review.</div>
+                  <div style="display:flex;gap:7px;align-items:flex-end;">
+                    <textarea placeholder="E.g. 'feeling tired', 'shoulder a bit tight'…" onInput="{{ onChatChange }}" style="flex:1;border:1.5px solid #E2D9CE;border-radius:9px;padding:8px 10px;font:400 13px/1.5 'Lora',serif;font-style:italic;color:#1A1714;background:#F9F5EF;outline:none;resize:none;height:54px;"></textarea>
+                    <button style="background:#9B6B42;color:#FFFFFF;border:none;border-radius:9px;padding:9px 13px;font:600 12px 'DM Sans',sans-serif;cursor:pointer;flex-shrink:0;height:36px;display:flex;align-items:center;">→</button>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+
+          <!-- Exercises -->
+          <div style="padding:0 16px;">
+            <div style="font:600 11px/1 'DM Sans',sans-serif;color:#9B8C7E;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Plan</div>
+
+            <sc-for list="{{ exercises }}" as="ex" hint-placeholder-count="5">
+              <div style="background:#FFFFFF;border-radius:14px;padding:14px 16px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05),0 0 0 1px rgba(0,0,0,0.03);">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+                  <div style="font:500 15px/1.3 'DM Sans',sans-serif;color:#1A1714;flex:1;margin-right:8px;">{{ ex.name }}</div>
+                  <sc-if value="{{ ex.hasSuperset }}" hint-placeholder-val="{{ false }}">
+                    <span style="background:#F0EDE8;color:#7A6F66;padding:3px 8px;border-radius:5px;font:600 10px 'DM Sans',sans-serif;letter-spacing:0.04em;flex-shrink:0;">SUPERSET</span>
+                  </sc-if>
+                  <sc-if value="{{ ex.noSuperset }}" hint-placeholder-val="{{ true }}">
+                    <span style="background:#F5EDE4;color:#9B6B42;padding:3px 9px;border-radius:20px;font:400 11px 'DM Sans',sans-serif;flex-shrink:0;">{{ ex.muscle }}</span>
+                  </sc-if>
+                </div>
+                <div style="font:400 13px/1 'DM Sans',sans-serif;color:#7A6F66;">{{ ex.prescriptionLine }}</div>
+                <sc-if value="{{ ex.hasSuperset }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:3px;background:#F9F5EF;border-radius:8px;padding:8px 10px;margin-top:7px;">
+                    <div style="display:flex;justify-content:space-between;">
+                      <span style="font:400 12px 'DM Sans',sans-serif;color:#4A4039;">{{ ex.name }}</span>
+                      <span style="font:600 12px 'DM Sans',sans-serif;color:#1A1714;">{{ ex.load }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                      <span style="font:400 12px 'DM Sans',sans-serif;color:#4A4039;">{{ ex.supersetWith }}</span>
+                      <span style="font:600 12px 'DM Sans',sans-serif;color:#1A1714;">{{ ex.supersetLoad }}</span>
+                    </div>
+                    <div style="font:400 11px 'DM Sans',sans-serif;color:#B0A497;margin-top:1px;">30 s between exercises · 90 s between rounds</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ ex.isCardio }}" hint-placeholder-val="{{ false }}">
+                  <div style="font:400 12px 'DM Sans',sans-serif;color:#9B8C7E;margin-top:4px;">Steady-state · logged as single set</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+
+          <!-- Begin button -->
+          <div style="padding:0 16px 32px;">
+            <button onClick="{{ startLogging }}" style="width:100%;background:#1A1714;color:#F5F0E8;border:none;border-radius:14px;padding:17px;font:600 16px 'DM Sans',sans-serif;cursor:pointer;letter-spacing:0.01em;">Begin logging</button>
+          </div>
+
+        </div>
+      </sc-if>
+
+      <!-- ══════════════════════════════
+           ACTIVE PHASE
+      ══════════════════════════════ -->
+      <sc-if value="{{ isActivePhase }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;animation:fadeIn 0.15s ease;">
+
+          <!-- Sticky header -->
+          <div style="position:sticky;top:0;z-index:10;background:#F5F0E8;padding:12px 18px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #EAE4DC;">
+            <button onClick="{{ backToPre }}" style="background:none;border:none;cursor:pointer;padding:4px 6px 4px 2px;color:#7A6F66;display:flex;align-items:center;gap:4px;font:400 12px 'DM Sans',sans-serif;">
+              <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1.5L1.5 7 7 12.5" stroke="#7A6F66" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div style="font:600 14px/1 'DM Sans',sans-serif;color:#1A1714;">Upper A</div>
+            <!-- Variant toggle -->
+            <sc-if value="{{ isVariantA }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;background:#EAE4DC;border-radius:7px;padding:2px;gap:1px;">
+                <div style="padding:4px 11px;background:#9B6B42;color:#FFFFFF;border-radius:5px;font:600 11px 'DM Sans',sans-serif;">A</div>
+                <div onClick="{{ setVariantB }}" style="padding:4px 11px;color:#7A6F66;border-radius:5px;font:400 11px 'DM Sans',sans-serif;cursor:pointer;">B</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isVariantB }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;background:#EAE4DC;border-radius:7px;padding:2px;gap:1px;">
+                <div onClick="{{ setVariantA }}" style="padding:4px 11px;color:#7A6F66;border-radius:5px;font:400 11px 'DM Sans',sans-serif;cursor:pointer;">A</div>
+                <div style="padding:4px 11px;background:#9B6B42;color:#FFFFFF;border-radius:5px;font:600 11px 'DM Sans',sans-serif;">B</div>
+              </div>
+            </sc-if>
+          </div>
+
+          <!-- Progress bar -->
+          <div style="padding:8px 18px 10px;background:#F5F0E8;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+              <span style="font:400 12px 'DM Sans',sans-serif;color:#9B8C7E;">{{ progressDisplay }}</span>
+              <span style="font:600 12px 'DM Sans',sans-serif;color:#9B6B42;">{{ progressPct }}%</span>
+            </div>
+            <div style="height:3px;background:#E2D9CE;border-radius:2px;overflow:hidden;">
+              <div style="{{ progressBarStyle }}"></div>
+            </div>
+          </div>
+
+          <!-- ── VARIANT A: List with set chips ── -->
+          <sc-if value="{{ isVariantA }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:4px 16px 16px;animation:fadeIn 0.15s ease;">
+              <div style="font:400 11px 'DM Sans',sans-serif;color:#B0A497;margin-bottom:10px;">Tap a set chip to mark it done.</div>
+
+              <sc-for list="{{ exercises }}" as="ex" hint-placeholder-count="5">
+                <div style="{{ ex.cardStyle }}">
+
+                  <!-- Exercise header -->
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                    <div>
+                      <div style="{{ ex.nameStyle }}">{{ ex.name }}</div>
+                      <div style="font:400 12px/1 'DM Sans',sans-serif;color:#9B8C7E;margin-top:3px;">{{ ex.prescriptionLine }}</div>
+                    </div>
+                    <sc-if value="{{ ex.allDone }}" hint-placeholder-val="{{ false }}">
+                      <div style="background:#E5F2DE;color:#2D5A22;padding:3px 9px;border-radius:6px;font:600 11px 'DM Sans',sans-serif;flex-shrink:0;margin-top:2px;">✓ Done</div>
+                    </sc-if>
+                    <sc-if value="{{ ex.notAllDone }}" hint-placeholder-val="{{ true }}">
+                      <div style="color:#B0A497;font:400 12px 'DM Sans',sans-serif;flex-shrink:0;margin-top:4px;">{{ ex.doneCount }}/{{ ex.sets }}</div>
+                    </sc-if>
+                  </div>
+
+                  <!-- Set chips -->
+                  <div style="display:flex;gap:7px;flex-wrap:wrap;">
+                    <sc-for list="{{ ex.setChips }}" as="chip" hint-placeholder-count="4">
+                      <button onClick="{{ chip.handler }}" style="{{ chip.chipStyle }}">
+                        <sc-if value="{{ chip.done }}" hint-placeholder-val="{{ false }}">
+                          <svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.8l3 3L10 1" stroke="#2D5A22" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </sc-if>
+                        {{ chip.label }}
+                      </button>
+                    </sc-for>
+                  </div>
+
+                  <sc-if value="{{ ex.hasSuperset }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid #F5F0E8;">
+                      <div style="flex:1;display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font:400 11px 'DM Sans',sans-serif;color:#9B8C7E;">{{ ex.name }}</span>
+                        <span style="font:600 11px 'DM Sans',sans-serif;color:#4A4039;">{{ ex.load }}</span>
+                      </div>
+                      <div style="width:1px;background:#EDE8E0;flex-shrink:0;"></div>
+                      <div style="flex:1;display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font:400 11px 'DM Sans',sans-serif;color:#9B8C7E;">{{ ex.supersetWith }}</span>
+                        <span style="font:600 11px 'DM Sans',sans-serif;color:#4A4039;">{{ ex.supersetLoad }}</span>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+
+              <button onClick="{{ finishWorkout }}" style="width:100%;background:#2E2820;color:rgba(245,240,232,0.65);border:none;border-radius:12px;padding:14px;font:500 14px 'DM Sans',sans-serif;cursor:pointer;margin-top:4px;">Finish workout</button>
+            </div>
+          </sc-if>
+
+          <!-- ── VARIANT B: Focused one exercise ── -->
+          <sc-if value="{{ isVariantB }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:12px 16px 20px;animation:fadeIn 0.15s ease;">
+
+              <!-- Progress dots -->
+              <div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:18px;">
+                <sc-for list="{{ exerciseDots }}" as="dot" hint-placeholder-count="5">
+                  <div style="{{ dot.dotStyle }}"></div>
+                </sc-for>
+              </div>
+
+              <!-- Focused exercise card -->
+              <div style="background:#FFFFFF;border-radius:20px;padding:22px 20px 20px;box-shadow:0 2px 16px rgba(0,0,0,0.08),0 0 0 1px rgba(0,0,0,0.03);margin-bottom:14px;">
+
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+                  <div style="font:600 22px/1.2 'DM Sans',sans-serif;color:#1A1714;max-width:225px;letter-spacing:-0.01em;">{{ currentEx.name }}</div>
+                  <span style="background:#F5EDE4;color:#9B6B42;padding:4px 10px;border-radius:20px;font:400 12px 'DM Sans',sans-serif;flex-shrink:0;margin-top:3px;">{{ currentExNum }} / {{ exerciseCount }}</span>
+                </div>
+
+                <div style="font:400 14px/1 'DM Sans',sans-serif;color:#7A6F66;margin-bottom:8px;">{{ currentEx.prescriptionLine }}</div>
+
+                <sc-if value="{{ currentEx.hasSuperset }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:10px;background:#F5EDE4;border-radius:10px;padding:10px 14px;margin-bottom:12px;">
+                    <div style="flex:1;text-align:center;">
+                      <div style="font:600 10px 'DM Sans',sans-serif;color:#9B6B42;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;">{{ currentEx.name }}</div>
+                      <div style="font:700 18px/1 'DM Sans',sans-serif;color:#1A1714;">{{ currentEx.load }}</div>
+                    </div>
+                    <div style="width:1px;background:rgba(155,107,66,0.25);"></div>
+                    <div style="flex:1;text-align:center;">
+                      <div style="font:600 10px 'DM Sans',sans-serif;color:#9B6B42;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;">{{ currentEx.supersetWith }}</div>
+                      <div style="font:700 18px/1 'DM Sans',sans-serif;color:#1A1714;">{{ currentEx.supersetLoad }}</div>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <div style="height:1px;background:#F0EBE3;margin:12px 0 14px;"></div>
+
+                <!-- Set rows -->
+                <sc-for list="{{ currentExSets }}" as="setRow" hint-placeholder-count="4">
+                  <button onClick="{{ setRow.handler }}" style="{{ setRow.rowStyle }}">
+                    <span style="{{ setRow.labelStyle }}">{{ setRow.label }}</span>
+                    <sc-if value="{{ setRow.done }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:5px;">
+                        <span style="font:400 12px 'DM Sans',sans-serif;color:#2D5A22;">Done</span>
+                        <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1.5 6l4 4L14.5 1.5" stroke="#2D5A22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ setRow.notDone }}" hint-placeholder-val="{{ true }}">
+                      <span style="font:400 13px 'DM Sans',sans-serif;color:#C0B8AF;">Tap to log</span>
+                    </sc-if>
+                  </button>
+                </sc-for>
+
+              </div>
+
+              <!-- Navigation -->
+              <div style="display:flex;gap:10px;margin-bottom:14px;">
+                <sc-if value="{{ isFirstExercise }}" hint-placeholder-val="{{ false }}">
+                  <button style="background:#EDE8E0;color:#C0B8AF;border:none;border-radius:12px;padding:14px 16px;font:500 14px 'DM Sans',sans-serif;cursor:default;flex-shrink:0;">← Prev</button>
+                </sc-if>
+                <sc-if value="{{ isNotFirstExercise }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ prevExercise }}" style="background:#EDE8E0;color:#1A1714;border:none;border-radius:12px;padding:14px 16px;font:500 14px 'DM Sans',sans-serif;cursor:pointer;flex-shrink:0;">← Prev</button>
+                </sc-if>
+
+                <sc-if value="{{ isNotLastExercise }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ nextExercise }}" style="flex:1;background:#9B6B42;color:#FFFFFF;border:none;border-radius:12px;padding:14px;font:600 15px 'DM Sans',sans-serif;cursor:pointer;">Next →</button>
+                </sc-if>
+                <sc-if value="{{ isLastExercise }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ finishWorkout }}" style="flex:1;background:#1A1714;color:#F5F0E8;border:none;border-radius:12px;padding:14px;font:600 15px 'DM Sans',sans-serif;cursor:pointer;">Finish ✓</button>
+                </sc-if>
+              </div>
+
+              <!-- All exercises mini list -->
+              <div style="background:#FFFFFF;border-radius:14px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+                <div style="font:600 10px 'DM Sans',sans-serif;color:#B0A497;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">All exercises</div>
+                <sc-for list="{{ exercises }}" as="ex" hint-placeholder-count="5">
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #F5F0E8;">
+                    <div style="display:flex;align-items:center;gap:9px;">
+                      <div style="{{ ex.listDotStyle }}"></div>
+                      <span style="font:400 13px 'DM Sans',sans-serif;color:#2A2320;">{{ ex.name }}</span>
+                    </div>
+                    <span style="font:400 12px 'DM Sans',sans-serif;color:#B0A497;">{{ ex.doneCount }}/{{ ex.sets }}</span>
+                  </div>
+                </sc-for>
+              </div>
+
+            </div>
+          </sc-if>
+
+        </div>
+      </sc-if>
+
+      <!-- ══════════════════════════════
+           REST TIMER OVERLAY
+      ══════════════════════════════ -->
+      <sc-if value="{{ restActive }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;background:rgba(20,17,14,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;animation:fadeIn 0.1s ease;">
+          <div style="font:400 11px/1 'DM Sans',sans-serif;color:rgba(245,240,232,0.4);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:12px;">Rest</div>
+          <div style="font:300 80px/1 'DM Sans',sans-serif;color:#F5F0E8;letter-spacing:-0.03em;margin-bottom:8px;animation:timerPulse 1.8s ease-in-out infinite;">{{ restDisplay }}</div>
+          <div style="font:400 12px/1 'DM Sans',sans-serif;color:rgba(245,240,232,0.35);margin-bottom:24px;">90 s · {{ lastLoggedExercise }}</div>
+          <div style="width:140px;height:2px;background:rgba(245,240,232,0.1);border-radius:1px;margin-bottom:28px;overflow:hidden;">
+            <div style="{{ restBarStyle }}"></div>
+          </div>
+          <button onClick="{{ dismissRest }}" style="background:rgba(245,240,232,0.08);color:rgba(245,240,232,0.7);border:1px solid rgba(245,240,232,0.14);border-radius:12px;padding:11px 28px;font:500 13px 'DM Sans',sans-serif;cursor:pointer;">Skip rest</button>
+        </div>
+      </sc-if>
+
+      <!-- ══════════════════════════════
+           DONE PHASE
+      ══════════════════════════════ -->
+      <sc-if value="{{ isDonePhase }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;animation:fadeIn 0.2s ease;padding-bottom:32px;">
+
+          <!-- Hero -->
+          <div style="display:flex;flex-direction:column;align-items:center;padding:36px 24px 20px;text-align:center;">
+            <div style="width:72px;height:72px;background:#E5F2DE;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:18px;animation:checkPop 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards;">
+              <svg width="30" height="22" viewBox="0 0 30 22" fill="none"><path d="M2 11l7.5 7.5L28 2" stroke="#2D5A22" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div style="font:600 26px/1.2 'DM Sans',sans-serif;color:#1A1714;letter-spacing:-0.01em;margin-bottom:5px;">Session complete</div>
+            <div style="font:400 13px/1 'DM Sans',sans-serif;color:#7A6F66;">Upper A · Monday</div>
+          </div>
+
+          <!-- Stats -->
+          <div style="display:flex;gap:10px;padding:0 16px 14px;">
+            <div style="flex:1;background:#FFFFFF;border-radius:14px;padding:14px 10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+              <div style="font:600 24px/1 'DM Sans',sans-serif;color:#1A1714;margin-bottom:5px;">{{ doneSets }}</div>
+              <div style="font:400 11px 'DM Sans',sans-serif;color:#9B8C7E;">sets logged</div>
+            </div>
+            <div style="flex:1;background:#FFFFFF;border-radius:14px;padding:14px 10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+              <div style="font:600 24px/1 'DM Sans',sans-serif;color:#9B6B42;margin-bottom:5px;">{{ totalVolume }}</div>
+              <div style="font:400 11px 'DM Sans',sans-serif;color:#9B8C7E;">total volume</div>
+            </div>
+            <div style="flex:1;background:#FFFFFF;border-radius:14px;padding:14px 10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+              <div style="font:600 24px/1 'DM Sans',sans-serif;color:#1A1714;margin-bottom:5px;">~47m</div>
+              <div style="font:400 11px 'DM Sans',sans-serif;color:#9B8C7E;">duration</div>
+            </div>
+          </div>
+
+          <!-- Progression note (if bench all done) -->
+          <sc-if value="{{ benchAllSetsDone }}" hint-placeholder-val="{{ false }}">
+            <div style="margin:0 16px 12px;background:#F5EDE4;border-radius:14px;padding:14px 16px;border-left:3px solid #9B6B42;">
+              <div style="font:600 11px 'DM Sans',sans-serif;color:#9B6B42;letter-spacing:0.04em;margin-bottom:5px;">PROGRESSION RULE TRIGGERED</div>
+              <div style="font:400 13px/1.65 'Lora',serif;color:#3A3028;font-style:italic;">All Bench sets hit. Your coach will confirm the +2.5 kg increase in tonight's session review.</div>
+            </div>
+          </sc-if>
+
+          <!-- Coach reviewing -->
+          <div style="margin:0 16px 20px;background:#FEFCF8;border-radius:14px;padding:14px 16px;border:1px solid #EDE8E0;">
+            <div style="font:600 11px 'DM Sans',sans-serif;color:#B0A497;letter-spacing:0.07em;margin-bottom:5px;">COACH REVIEWING</div>
+            <div style="font:400 13px/1.65 'Lora',serif;color:#3A3028;font-style:italic;">Session review runs tonight. Any Proposals will appear in your coaching feed.</div>
+          </div>
+
+          <div style="padding:0 16px;">
+            <button onClick="{{ backToPre }}" style="width:100%;background:#1A1714;color:#F5F0E8;border:none;border-radius:14px;padding:16px;font:600 16px 'DM Sans',sans-serif;cursor:pointer;">Done</button>
+          </div>
+
+        </div>
+      </sc-if>
+
+    </div>
+    <!-- END CONTENT -->
+
+  </div>
+  <!-- END PHONE -->
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 430, &quot;height&quot;: 900 }
+}">
+class Component extends DCLogic {
+  state = {
+    workoutPhase: 'pre',
+    loggingVariant: 'A',
+    currentExercise: 0,
+    adviceExpanded: false,
+    chatInput: '',
+    sets: {
+      0: [false, false, false, false], // Bench Press  4 sets
+      1: [false, false, false],        // Incline DB   3 sets
+      2: [false, false, false],        // Cable Fly    3 sets
+      3: [false, false, false],        // Tricep SS    3 sets
+      4: [false],                      // Run          1 set
+    },
+    restActive: false,
+    restSecs: 90,
+    restElapsed: 0,
+    lastLoggedEx: 0,
+  };
+
+  _restInterval = null;
+
+  logSet(exIdx, setIdx) {
+    const sets = {};
+    Object.keys(this.state.sets).forEach(k => { sets[k] = [...this.state.sets[k]]; });
+    sets[exIdx][setIdx] = true;
+    this.setState({ sets, restActive: true, restElapsed: 0, lastLoggedEx: exIdx });
+    this._startRest();
+  }
+
+  _startRest() {
+    if (this._restInterval) clearInterval(this._restInterval);
+    this._restInterval = setInterval(() => {
+      this.setState(prev => {
+        if (prev.restElapsed >= prev.restSecs - 1) {
+          clearInterval(this._restInterval);
+          return { restActive: false, restElapsed: 0 };
+        }
+        return { restElapsed: prev.restElapsed + 1 };
+      });
+    }, 1000);
+  }
+
+  dismissRest() {
+    if (this._restInterval) clearInterval(this._restInterval);
+    this.setState({ restActive: false, restElapsed: 0 });
+  }
+
+  componentWillUnmount() {
+    if (this._restInterval) clearInterval(this._restInterval);
+  }
+
+  _computeVolume(sets, exercises) {
+    let vol = 0;
+    exercises.forEach((ex, i) => {
+      const kg = parseFloat(ex.load);
+      if (!isNaN(kg)) {
+        const done = (sets[i] || []).filter(Boolean).length;
+        vol += done * 9 * kg; // ~9 reps avg
+      }
+    });
+    if (vol === 0) return '—';
+    return vol >= 1000 ? (vol / 1000).toFixed(1) + 't' : Math.round(vol) + ' kg';
+  }
+
+  renderVals() {
+    const s = this.state;
+
+    const EXERCISES = [
+      { id: 0, name: 'Bench Press',       sets: 4, reps: '8–10',  load: '82.5 kg', muscle: 'Chest',       supersetWith: null,           supersetLoad: null,   isCardio: false, duration: null },
+      { id: 1, name: 'Incline DB Press',  sets: 3, reps: '10–12', load: '30 kg',   muscle: 'Upper Chest', supersetWith: null,           supersetLoad: null,   isCardio: false, duration: null },
+      { id: 2, name: 'Cable Fly',         sets: 3, reps: '12–15', load: '15 kg',   muscle: 'Chest',       supersetWith: null,           supersetLoad: null,   isCardio: false, duration: null },
+      { id: 3, name: 'Tricep Pushdown',   sets: 3, reps: '12–15', load: '35 kg',   muscle: 'Triceps',     supersetWith: 'OH Extension', supersetLoad: '20 kg', isCardio: false, duration: null },
+      { id: 4, name: 'Steady-state Run',  sets: 1, reps: null,    load: null,      muscle: 'Cardio',      supersetWith: null,           supersetLoad: null,   isCardio: true,  duration: '15 min' },
+    ];
+
+    const exercisesWithSets = EXERCISES.map((ex, exIdx) => {
+      const exSets = s.sets[exIdx] || [];
+      const doneCount = exSets.filter(Boolean).length;
+      const allDone = doneCount === ex.sets;
+      const isActive = exIdx === s.currentExercise;
+
+      return {
+        ...ex,
+        doneCount,
+        allDone,
+        notAllDone: !allDone,
+        hasSuperset: !!ex.supersetWith,
+        noSuperset: !ex.supersetWith,
+        isCardio: !!ex.isCardio,
+        prescriptionLine: ex.isCardio
+          ? ex.duration
+          : ex.supersetWith
+            ? `${ex.sets} sets · ${ex.reps} reps`
+            : `${ex.sets} sets · ${ex.reps} reps · ${ex.load}`,
+
+        // Variant A card style — green tint when all done
+        cardStyle: {
+          background: allDone ? '#F6FBF4' : '#FFFFFF',
+          borderRadius: '14px',
+          padding: '14px 16px',
+          marginBottom: '8px',
+          boxShadow: allDone
+            ? '0 1px 4px rgba(0,0,0,0.04),0 0 0 1px rgba(45,90,34,0.14)'
+            : '0 1px 4px rgba(0,0,0,0.055),0 0 0 1px rgba(0,0,0,0.03)',
+        },
+        nameStyle: {
+          fontFamily: "'DM Sans',sans-serif",
+          fontSize: '15px',
+          lineHeight: '1.3',
+          fontWeight: allDone ? '400' : '600',
+          color: allDone ? '#2D5A22' : '#1A1714',
+        },
+        // Mini list dot for Variant B
+        listDotStyle: {
+          width: '7px',
+          height: '7px',
+          borderRadius: '50%',
+          flexShrink: '0',
+          background: allDone ? '#2D5A22' : isActive ? '#9B6B42' : '#DDD6CC',
+        },
+
+        setChips: exSets.map((done, i) => ({
+          label: ex.isCardio ? (ex.duration || `Set ${i + 1}`) : `Set ${i + 1}`,
+          done,
+          notDone: !done,
+          handler: done ? null : () => this.logSet(exIdx, i),
+          chipStyle: {
+            background: done ? '#E5F2DE' : '#FFFFFF',
+            border: `1.5px solid ${done ? '#9FC895' : '#E2D9CE'}`,
+            borderRadius: '8px',
+            padding: '8px 13px',
+            cursor: done ? 'default' : 'pointer',
+            fontFamily: "'DM Sans',sans-serif",
+            fontSize: '13px',
+            fontWeight: done ? '500' : '400',
+            color: done ? '#2D5A22' : '#1A1714',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            flexShrink: '0',
+            outline: 'none',
+          },
+        })),
+      };
+    });
+
+    // Progress
+    const totalSets = EXERCISES.reduce((s, ex) => s + ex.sets, 0);
+    const doneSets = Object.values(s.sets).reduce((sum, exS) => sum + exS.filter(Boolean).length, 0);
+    const progressPct = Math.round((doneSets / totalSets) * 100);
+
+    // Current exercise (Variant B)
+    const curIdx = s.currentExercise;
+    const _curEx = EXERCISES[curIdx];
+    const currentEx = {
+      ..._curEx,
+      hasSuperset: !!_curEx.supersetWith,
+      noSuperset: !_curEx.supersetWith,
+      isCardio: !!_curEx.isCardio,
+      prescriptionLine: _curEx.isCardio
+        ? _curEx.duration
+        : _curEx.supersetWith
+          ? `${_curEx.sets} sets · ${_curEx.reps} reps`
+          : `${_curEx.sets} sets · ${_curEx.reps} reps · ${_curEx.load}`,
+    };
+    const currentExRawSets = s.sets[curIdx] || [];
+    const currentExSets = currentExRawSets.map((done, i) => ({
+      label: _curEx.isCardio ? (_curEx.duration || `Set ${i + 1}`) : `Set ${i + 1}`,
+      done,
+      notDone: !done,
+      handler: done ? null : () => this.logSet(curIdx, i),
+      rowStyle: {
+        width: '100%',
+        border: `1.5px solid ${done ? '#9FC895' : '#E2D9CE'}`,
+        borderRadius: '12px',
+        padding: '15px 18px',
+        marginBottom: '8px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        cursor: done ? 'default' : 'pointer',
+        background: done ? '#E5F2DE' : '#F9F5EF',
+        outline: 'none',
+      },
+      labelStyle: {
+        fontFamily: "'DM Sans',sans-serif",
+        fontSize: '15px',
+        fontWeight: '500',
+        color: done ? '#2D5A22' : '#1A1714',
+      },
+    }));
+
+    // Exercise progress dots (Variant B)
+    const exerciseDots = EXERCISES.map((ex, i) => {
+      const isActive = i === curIdx;
+      const isDone = (s.sets[i] || []).filter(Boolean).length === ex.sets;
+      return {
+        dotStyle: {
+          height: '8px',
+          width: isActive ? '22px' : '8px',
+          borderRadius: '4px',
+          flexShrink: '0',
+          background: isDone ? '#2D5A22' : isActive ? '#9B6B42' : '#DDD6CC',
+          transition: 'width 0.2s ease, background 0.2s ease',
+        },
+      };
+    });
+
+    // Rest timer
+    const restRemaining = Math.max(0, s.restSecs - s.restElapsed);
+    const restMin = Math.floor(restRemaining / 60);
+    const restSec = String(restRemaining % 60).padStart(2, '0');
+
+    return {
+      // Phase
+      isPrePhase:    s.workoutPhase === 'pre',
+      isActivePhase: s.workoutPhase === 'active',
+      isDonePhase:   s.workoutPhase === 'done',
+
+      // Pre-screen advice
+      adviceExpanded: s.adviceExpanded,
+      adviceCollapsed: !s.adviceExpanded,
+      toggleAdvice: () => this.setState(st => ({ adviceExpanded: !st.adviceExpanded })),
+      chatInput: s.chatInput,
+      onChatChange: (e) => this.setState({ chatInput: e.target.value }),
+
+      // Variant
+      isVariantA: s.loggingVariant === 'A',
+      isVariantB: s.loggingVariant === 'B',
+      setVariantA: () => this.setState({ loggingVariant: 'A' }),
+      setVariantB: () => this.setState({ loggingVariant: 'B' }),
+
+      // Navigation
+      goHome:       () => this.setState({ workoutPhase: 'pre' }),
+      startLogging: () => this.setState({ workoutPhase: 'active' }),
+      backToPre:    () => {
+        if (this._restInterval) clearInterval(this._restInterval);
+        this.setState({
+          workoutPhase: 'pre', restActive: false, restElapsed: 0, currentExercise: 0,
+          sets: { 0:[false,false,false,false], 1:[false,false,false], 2:[false,false,false], 3:[false,false,false], 4:[false] },
+        });
+      },
+      finishWorkout: () => {
+        if (this._restInterval) clearInterval(this._restInterval);
+        this.setState({ workoutPhase: 'done', restActive: false });
+      },
+
+      // Progress
+      doneSets,
+      totalSets,
+      progressPct,
+      progressDisplay: `${doneSets} / ${totalSets} sets`,
+      progressBarStyle: { height: '100%', width: `${progressPct}%`, background: '#9B6B42', borderRadius: '2px', transition: 'width 0.3s ease' },
+
+      // Exercises
+      exercises: exercisesWithSets,
+
+      // Variant B — current exercise
+      currentEx,
+      currentExIdx: curIdx,
+      currentExNum: curIdx + 1,
+      exerciseCount: EXERCISES.length,
+      currentExSets,
+      exerciseDots,
+      isFirstExercise:    curIdx === 0,
+      isLastExercise:     curIdx === EXERCISES.length - 1,
+      isNotFirstExercise: curIdx > 0,
+      isNotLastExercise:  curIdx < EXERCISES.length - 1,
+      prevExercise: () => this.setState(st => ({ currentExercise: Math.max(0, st.currentExercise - 1) })),
+      nextExercise: () => this.setState(st => ({ currentExercise: Math.min(EXERCISES.length - 1, st.currentExercise + 1) })),
+
+      // Rest timer
+      restActive: s.restActive,
+      restDisplay: `${restMin}:${restSec}`,
+      restBarStyle: { height: '100%', width: `${Math.round((s.restElapsed / s.restSecs) * 100)}%`, background: '#9B6B42', borderRadius: '1px', transition: 'width 1s linear' },
+      dismissRest: () => this.dismissRest(),
+      lastLoggedExercise: EXERCISES[s.lastLoggedEx]?.name || '',
+
+      // Done phase
+      totalVolume: this._computeVolume(s.sets, EXERCISES),
+      benchAllSetsDone: s.sets[0] && s.sets[0].every(Boolean),
+    };
+  }
+}
+</script>
+</body>
+</html>

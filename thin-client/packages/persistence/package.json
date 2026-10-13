@@ -1,0 +1,29 @@
+{
+  "name": "@repcoach/persistence",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./store": {
+      "types": "./src/store.ts",
+      "default": "./src/store.ts"
+    },
+    "./decisionWorking": {
+      "types": "./src/decisionWorking.ts",
+      "default": "./src/decisionWorking.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -b --force"
+  },
+  "dependencies": {
+    "@repcoach/contracts": "workspace:*",
+    "@repcoach/client-runtime": "workspace:*",
+    "@effect/platform-node": "4.0.0-beta.78",
+    "effect": "4.0.0-beta.78"
+  }
+}

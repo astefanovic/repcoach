@@ -1,0 +1,157 @@
+{
+  "$comment": "Evidence base WORKING SEED per ADR 0003 — vetted and live, not a draft. All entries are corpus-verified; sources were fetched, read against their claim, and accepted by the owner 2026-07-25. The ADR 0003 §4 human promotion gate governs RUNTIME growth (retrieved sources promoted mid-deliberation), not this file; seed entries were authored offline against the inclusion test and enter the corpus directly. Edits to a seated entry are ordinary reviewed changes — keep in sync with evidence-base-seed.md.",
+  "version": "1.0.0",
+  "status": "working-seed",
+  "adr": "docs/adr/0003-evidence-sourcing-corpus-then-retrieval.md",
+  "entries": [
+    {
+      "id": "E1",
+      "topic": "progressive-overload",
+      "claim": "Continued muscular adaptation requires the training stimulus to be increased progressively over time; repeating an unchanged workload indefinitely stops producing gains.",
+      "source": {
+        "citation": "American College of Sports Medicine. Progression Models in Resistance Training for Healthy Adults (position stand). Med Sci Sports Exerc. 2009;41(3):687-708.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/19204579/",
+        "tier": "position-stand",
+        "open_access": "abstract-only"
+      },
+      "applicability": "Holds for every trainee and every Plan model — it is the reason a Plan needs Progression rules at all. It says that the stimulus must rise, not how: load, reps, sets, and proximity-to-failure are all valid progression currencies, and which to advance (and how fast) is retrieval-time. Override the rate, never the principle: during illness, deload, injury or a deliberate maintenance phase, holding or reducing the stimulus is correct.",
+      "trust": "corpus-verified"
+    },
+    {
+      "id": "E2",
+      "topic": "hypertrophy-rep-range",
+      "claim": "Similar muscle hypertrophy can be achieved across a broad spectrum of loads and repetition ranges — roughly 5 to 30 reps per set (loads above about 30% of 1RM) — provided sets are taken to a high level of effort.",
+      "source": {
+        "citation": "Schoenfeld BJ, Grgic J, Van Every DW, Plotkin DL. Loading Recommendations for Muscle Strength, Hypertrophy, and Local Endurance: A Re-Examination of the Repetition Continuum. Sports (Basel). 2021;9(2):32.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7927075/",
+        "tier": "review",
+        "open_access": "full-text"
+      },
+      "applicability": "Applies to hypertrophy as the goal, and only under the effort proviso in E3 — the light-load half of the range collapses if sets stop well short of fatigue. Does not transfer to maximal strength, which remains load-specific. Practical override: moderate loads are usually the default anyway (less discomfort at the light end, less joint stress and fatigue cost at the heavy end); exercise-specific ceilings and injury history can narrow the usable band.",
+      "trust": "corpus-verified"
+    },
+    {
+      "id": "E3",
+      "topic": "proximity-to-failure",
+      "claim": "Hypertrophy increases as sets are taken closer to muscular failure, but training to momentary failure itself is not required for growth.",
+      "source": {
+        "citation": "Refalo MC, Helms ER, Trexler ET, Hamilton DL, Fyfe JJ. Influence of Resistance Training Proximity-to-Failure on Skeletal Muscle Hypertrophy: A Systematic Review with Meta-analysis. Sports Med. 2023;53(3):649-665.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9935748/",
+        "tier": "meta-analysis",
+        "open_access": "full-text",
+        "corroborating": {
+          "citation": "Robinson ZP, Pelland JC, Remmert JF, et al. Exploring the Dose-Response Relationship Between Estimated Resistance Training Proximity to Failure, Strength Gain, and Muscle Hypertrophy: A Series of Meta-Regressions. Sports Med. 2024;54(9):2209-2231.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/38970765/",
+          "open_access": "abstract-only",
+          "carries": "the 'closer to failure = more growth' clause"
+        }
+      },
+      "applicability": "Governs how the coach sets and reads effort targets (RIR/RPE) on prescribed sets, and is the proviso that makes E2's broad range valid. The second clause is load-sensitive: the further from failure a set stops, the more it depends on load being sufficient, so lighter sets need to be taken nearer failure than heavy ones. Override toward more reps in reserve when fatigue cost matters more than per-set stimulus — high-volume phases, heavy or technically demanding compounds, poor recovery, injury risk. The specific RIR target for a given lift, week, or phase is retrieval-time, not seed.",
+      "trust": "corpus-verified"
+    },
+    {
+      "id": "E4",
+      "topic": "weekly-volume-dose-response",
+      "claim": "Muscle hypertrophy scales with the number of hard sets performed per muscle group per week, in a positive dose-response relationship that flattens as volume rises.",
+      "source": {
+        "citation": "Pelland JC, Remmert JF, Robinson ZP, Hinson SR, Zourdos MC. The Resistance Training Dose Response: Meta-Regressions Exploring the Effects of Weekly Volume and Frequency on Muscle Hypertrophy and Strength Gains. Sports Med. 2026 Feb.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/41343037/",
+        "doi": "10.1007/s40279-025-02344-w",
+        "tier": "meta-analysis",
+        "open_access": "abstract-only",
+        "corroborating": {
+          "citation": "Schoenfeld BJ, Ogborn D, Krieger JW. Dose-response relationship between weekly resistance training volume and increases in muscle mass: A systematic review and meta-analysis. J Sports Sci. 2017;35(11):1073-1082.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/27433992/",
+          "open_access": "abstract-only",
+          "carries": "the positive-direction clause only; it reports a graded dose-response with no plateau, so it does not support the diminishing-returns clause"
+        }
+      },
+      "applicability": "Weekly sets per muscle group is the unit the coach budgets a Plan in — this is what makes weekly volume, not session volume, the planning currency. Deliberately excludes any specific number: MEV/MAV/MRV landmarks and 'the right' weekly set count are contested and retrieval-time. The relationship is bounded by recovery — more sets stop paying once fatigue, soreness, or performance decay accumulate, which is what the Check-in and Log signals are for. Override during deloads, low-recovery periods, and maintenance phases.",
+      "trust": "corpus-verified"
+    },
+    {
+      "id": "E5",
+      "topic": "frequency-distributes-volume",
+      "claim": "When weekly set volume is equated, training frequency has little independent effect on hypertrophy, so frequency should be chosen as the means of distributing the weekly volume target rather than as a stimulus in its own right.",
+      "source": {
+        "citation": "Pelland JC, Remmert JF, Robinson ZP, Hinson SR, Zourdos MC. The Resistance Training Dose Response: Meta-Regressions Exploring the Effects of Weekly Volume and Frequency on Muscle Hypertrophy and Strength Gains. Sports Med. 2026 Feb.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/41343037/",
+        "doi": "10.1007/s40279-025-02344-w",
+        "tier": "meta-analysis",
+        "open_access": "abstract-only",
+        "superseded_prior_position": {
+          "citation": "Schoenfeld BJ, Ogborn D, Krieger JW. Effects of Resistance Training Frequency on Measures of Muscle Hypertrophy: A Systematic Review and Meta-Analysis. Sports Med. 2016;46(11):1689-1697.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/27102172/",
+          "warning": "DO NOT CITE AS SUPPORT — contradicts this entry. Concludes volume-equated twice-weekly training is superior to once-weekly. Superseded by the seated source, which used a much larger dataset and continuous meta-regression rather than categorical comparison. Recorded as provenance so the coach does not rediscover it as a surprise."
+        }
+      },
+      "applicability": "This is what licenses the agent to lay out a split: it may distribute a muscle's weekly sets across whatever session structure fits the user's availability, without owing the user a frequency-specific justification. It cuts both ways — high weekly volumes must be spread across more sessions to remain executable, so frequency is constrained from below by per-session fatigue rather than by an adaptation requirement. Scoped to hypertrophy: the same analysis finds higher frequency does favour strength gains. Override when schedule, recovery, or exercise selection makes a distribution impractical.",
+      "trust": "corpus-verified"
+    },
+    {
+      "id": "E6",
+      "topic": "hypertrophy-is-local-to-loaded-muscle",
+      "claim": "Muscle growth occurs only in the muscles that the training actually loads, so a Plan must ensure every muscle the user wants to develop is loaded by some exercise in it.",
+      "source": {
+        "citation": "Wackerhage H, Schoenfeld BJ, Hamilton DL, Lehti M, Hulmi JJ. Stimuli and sensors that initiate skeletal muscle hypertrophy following resistance exercise. J Appl Physiol. 2019;126(1):30-43.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30335577/",
+        "doi": "10.1152/japplphysiol.00685.2018",
+        "tier": "review",
+        "open_access": "abstract-only",
+        "note": "The review does not resolve the mechanism, but every candidate stimulus it considers is local to the loaded muscle, so locality holds whichever wins."
+      },
+      "applicability": "The coverage rule behind exercise selection: licenses the coach to check a Plan for un-loaded target muscles and to justify adding work for them. Says a target muscle must be loaded — deliberately not that it needs a dedicated isolation exercise, since direct-vs-indirect sufficiency is contested and retrieval-time. Says nothing about which exercise to pick.",
+      "trust": "corpus-verified",
+      "passes": "(a) grounds exercise coverage, the one first-Plan authoring decision the seated roster leaves unsupported, and gives E4's per-muscle unit its justification. (b) locality is undisputed; the unilateral within-subject research design presupposes it."
+    },
+    {
+      "id": "E7",
+      "topic": "soreness-is-not-the-stimulus",
+      "claim": "Muscle damage and the soreness that accompanies it are neither required for nor indicative of muscle growth, so soreness cannot be used to judge whether a session delivered an effective stimulus.",
+      "source": {
+        "citation": "Damas F, Libardi CA, Ugrinowitsch C. The development of skeletal muscle hypertrophy through resistance training: the role of muscle damage and muscle protein synthesis. Eur J Appl Physiol. 2018;118(3):485-500.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/29282529/",
+        "tier": "review",
+        "open_access": "abstract-only",
+        "corroborating": {
+          "citation": "Schoenfeld BJ, Contreras B. Is Postexercise Muscle Soreness a Valid Indicator of Muscular Adaptations? Strength Cond J. 2013;35(5):16-21.",
+          "note": "titled directly at the claim but practitioner-journal tier, hence corroboration not seat",
+          "url": "https://journals.lww.com/nsca-scj/fulltext/2013/10000/is_postexercise_muscle_soreness_a_valid_indicator.2.aspx",
+          "doi": "10.1519/SSC.0b013e3182a61820"
+        }
+      },
+      "applicability": "Governs how the coach reads the soreness field of a Check-in: a recovery and tolerance signal, never evidence that a session worked or that a Plan is under-stimulating. Blocks both escalating volume on absent soreness and reading soreness as confirmation. Does not make soreness worthless — persistent or severe soreness remains legitimate grounds for an Observation about recovery or too-fast progression.",
+      "trust": "corpus-verified",
+      "passes": "(b) clearly — the review states damage is not the process mediating RT-induced hypertrophy. (a) passes only on a 'load-bearing on the coach's first decisions' reading rather than a strict authoring reading; recommended on the retrieval-blind-spot argument (a confidently-held wrong prior generates no search query)."
+    }
+  ],
+  "excluded": [
+    "Volume landmarks (MEV/MAV/MRV numbers, specific weekly set counts) — direction settled, numbers are not",
+    "Specific RIR targets — direction settled, number is not",
+    "Periodization models (linear, undulating, block) — the Plan-model decision itself",
+    "Deload timing and necessity",
+    "Exercise selection and ordering; free-weight vs machine",
+    "Rest interval duration — fails (a) on the evidence: the current Bayesian meta-analysis finds both short and long rests viable for untrained individuals (https://pmc.ncbi.nlm.nih.gov/articles/PMC11349676/)",
+    "Advanced techniques (myo-reps, drop sets, lengthened partials, ROM manipulation)",
+    "Full range of motion — fails (b): full-vs-partial difference is small with CIs crossing zero, and lengthened partials actively contest it",
+    "Nutrition / energy state incl. protein intake — fails (a) for a training Plan; RepCoach models no intake",
+    "Individual variability / non-responders — fails (b): separating true inter-individual variability from measurement error is unresolved",
+    "Exercise technique / form — fails (a); the Plan does not model form",
+    "Untrained-beginner 'anything works' effect — fails (a), and would licence under-specifying the first Plan",
+    "Detraining / consistency — fails (a) for authoring; settled core already implied by E1",
+    "Sleep and recovery duration — fails (b) at the needed specificity; no widespread wrong prior for a seed entry to block"
+  ],
+  "vetted": {
+    "date": "2026-07-25",
+    "method": "every seat and corroborating reference fetched and read for claim-support, not URL resolution",
+    "defects_fixed": [
+      "E4: reseated on Pelland 2026 — Schoenfeld 2017 reports a graded dose-response with no plateau and does not carry the diminishing-returns clause",
+      "E5: Schoenfeld 2016 recatalogued from corroborating to superseded — it concludes volume-equated twice-weekly beats once-weekly, contradicting the entry"
+    ],
+    "known_limitation": "E1, E4, E5, E6, E7 are abstract-only; accepted per ADR 0003 §2",
+    "revisit_first": [
+      "E5",
+      "E1"
+    ]
+  }
+}
