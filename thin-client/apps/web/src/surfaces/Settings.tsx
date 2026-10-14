@@ -162,7 +162,7 @@ function ModelSection({
       <div className="mt-4 border-t border-border pt-3">
         <span className="text-sm font-semibold">{CADENCE_LABEL["revision-run"]}</span>
         <p className="mt-1 text-sm leading-snug text-text-muted">
-          Uses the Session review model, so arguing with the coach is never the most expensive thing in the
+          Reads the Session review model, so arguing with the coach is never the most expensive thing in the
           app.
         </p>
       </div>
