@@ -55,6 +55,7 @@ import {
   Working,
   cadenceLabel,
   formatDay,
+  formatDayTime,
   formatSpan,
   plural,
 } from "./coachItem.tsx";
@@ -199,14 +200,6 @@ const triggerLabel = (cadence: string): string =>
           ? "at cold start"
           : "because you asked for a run";
 
-/** The clock time a run started, beside its day — a rail of dates alone cannot separate two runs in one evening. */
-const dayTime = (iso: string): string => {
-  const date = new Date(iso);
-  const hours = String(date.getUTCHours()).padStart(2, "0");
-  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
-  return `${formatDay(iso)} ${hours}:${minutes}`;
-};
-
 function RunNode({
   run,
   open,
@@ -251,7 +244,7 @@ function RunNode({
             {cadenceLabel(run.cadence)}
           </span>
           <span className="font-numeric text-[0.625rem] tracking-wide text-text-faint uppercase">
-            {dayTime(run.startedAt)}
+            {formatDayTime(run.startedAt)}
           </span>
         </span>
         <span className="mt-0.5 block text-sm leading-snug">

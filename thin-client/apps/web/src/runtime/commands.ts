@@ -294,13 +294,23 @@ export async function getDailySetCounts(runtime: RepCoachRuntime): Promise<GetDa
  * partial export assembled from this device's caches would be a worse lie
  * than a disabled button.
  */
+/**
+ * `YYYY-MM-DD` on this device's calendar. `exportedAt` is a UTC instant, and
+ * slicing its first ten characters dates an export taken at 2am in Sydney as
+ * the previous day.
+ */
+export const localDateStamp = (date: Date): string => {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
 export async function downloadDataExport(runtime: RepCoachRuntime): Promise<void> {
   const exported = await callRpc(runtime, RPC_METHODS.exportData, {});
   const blob = new Blob([JSON.stringify(exported, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `repcoach-export-${exported.exportedAt.slice(0, 10)}.json`;
+  link.download = `repcoach-export-${localDateStamp(new Date(exported.exportedAt))}.json`;
   document.body.append(link);
   link.click();
   link.remove();

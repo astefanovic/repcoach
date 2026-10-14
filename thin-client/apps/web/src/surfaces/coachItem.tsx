@@ -167,10 +167,23 @@ export function windowLabel(working: DecisionWorking | undefined): string | unde
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-/** A bare day — "3 Jul". Shared with the run rail, which dates every run node. */
+/**
+ * A bare day — "3 Jul". Shared with the run rail, which dates every run node.
+ *
+ * In the viewer's own time zone: the instants are stored in UTC, but a run
+ * that happened at 7am on the 15th read as the 14th anywhere east of Greenwich.
+ */
 export const formatDay = (iso: string): string => {
   const date = new Date(iso);
-  return `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`;
+  return `${date.getDate()} ${MONTHS[date.getMonth()]}`;
+};
+
+/** The clock time a run started, beside its day — a rail of dates alone cannot separate two runs in one evening. */
+export const formatDayTime = (iso: string): string => {
+  const date = new Date(iso);
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${formatDay(iso)} ${hours}:${minutes}`;
 };
 
 /** The span a run read over, from its data window. `undefined` when it recorded neither end. */
