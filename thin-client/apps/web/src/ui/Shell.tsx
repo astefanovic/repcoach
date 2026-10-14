@@ -215,8 +215,8 @@ export function Shell({
     // whether a surface gets two columns. They are supposed to disagree (#42):
     // at ~800px you get a sidebar and still-stacked content, because after the
     // sidebar there genuinely is not 42rem left.
-    <div className="@container/shell min-h-full bg-canvas">
-      <div className="flex min-h-full flex-col @3xl/shell:flex-row">
+    <div className="@container/shell min-h-dvh bg-canvas">
+      <div className="flex min-h-dvh flex-col @3xl/shell:flex-row">
         <Sidebar active={active} badges={badges} />
         {/* the strip spans the content column, not the sidebar — hence its
             living inside this flex child rather than above the whole shell */}
@@ -242,7 +242,7 @@ export function ModeShell({
   children: ReactNode;
 }) {
   return (
-    <div className="@container flex min-h-full flex-col bg-canvas">
+    <div className="@container flex min-h-dvh flex-col bg-canvas">
       {strip && <StatusStrip state={strip} right={stripRight} />}
       <div className="min-h-0 flex-1">{children}</div>
     </div>

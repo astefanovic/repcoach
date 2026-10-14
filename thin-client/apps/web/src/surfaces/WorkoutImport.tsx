@@ -240,7 +240,7 @@ function ImportPreview({
                 </label>
                 <select
                   id={`import-${name}`}
-                  className="rounded border border-border-strong bg-transparent px-2 py-1 text-sm"
+                  className="select-field"
                   value={resolved.get(name)}
                   onChange={(event) => onChoose(name, event.target.value)}
                 >

@@ -162,8 +162,8 @@ function ModelSection({
       <div className="mt-4 border-t border-border pt-3">
         <span className="text-sm font-semibold">{CADENCE_LABEL["revision-run"]}</span>
         <p className="mt-1 text-sm leading-snug text-text-muted">
-          Not configurable — a Revision run reads the Session review model (ADR 0013 §6), so arguing with the coach
-          can never be the most expensive thing in the app.
+          Uses the Session review model, so arguing with the coach is never the most expensive thing in the
+          app.
         </p>
       </div>
     </section>
@@ -225,7 +225,7 @@ function ModelRow({
       <div className="flex flex-wrap items-center gap-2">
         <select
           id={`model-${cadence}`}
-          className="rounded border border-border-strong bg-transparent px-2 py-1 text-sm"
+          className="select-field"
           value={selectValue}
           onChange={(event) => {
             const value = event.target.value;
@@ -237,7 +237,7 @@ function ModelRow({
           }}
         >
           <option value="" disabled>
-            SDK default
+            Default
           </option>
           {catalog.map((model) => (
             <option key={model.id} value={model.id}>
@@ -253,7 +253,7 @@ function ModelRow({
         {selectValue === CUSTOM_MODEL && (
           <input
             aria-label={`Custom model id for ${CADENCE_LABEL[cadence]}`}
-            className="rounded border border-border-strong bg-transparent px-2 py-1 text-sm"
+            className="text-field"
             placeholder="model id"
             value={customText}
             onChange={(event) => setCustomText(event.target.value)}
@@ -268,7 +268,7 @@ function ModelRow({
             </label>
             <select
               id={`effort-${cadence}`}
-              className="rounded border border-border-strong bg-transparent px-2 py-1 text-sm"
+              className="select-field"
               value={current.effort ?? NO_EFFORT}
               onChange={(event) => {
                 const value = event.target.value;
@@ -327,13 +327,13 @@ function RpeSection({
       {infoOpen && (
         <p className="mt-1 text-sm leading-snug text-text-muted">
           Flagged sets only is the default because it keeps the unflagged majority of your sets one-tap — RPE shows
-          up only where the coach has already flagged a set worth a closer look (#63).
+          up only where the coach has already flagged a set worth a closer look.
         </p>
       )}
 
       <div role="radiogroup" aria-label="RPE capture" className="mt-2 flex flex-col gap-1.5">
         {RPE_OPTIONS.map((option) => (
-          <label key={option.mode} className="flex items-center gap-2 text-sm">
+          <label key={option.mode} className="flex min-h-10 items-center gap-3 text-sm">
             <input
               type="radio"
               name="rpe-capture-mode"
@@ -401,7 +401,7 @@ function RestTimerNotifySection() {
         When rest ends while the app is in the background or the phone is locked, show a
         notification. Per device, so it is not a home-server setting.
       </p>
-      <label className="mt-2 flex items-center gap-2 text-sm">
+      <label className="mt-2 flex min-h-10 items-center gap-3 text-sm">
         <input type="checkbox" checked={enabled} onChange={(event) => turn(event.target.checked)} />
         Notify when rest ends
       </label>
@@ -443,7 +443,7 @@ function WeightUnitSection() {
             { unit: "lb", label: "Pounds (lb)" },
           ] as const
         ).map((option) => (
-          <label key={option.unit} className="flex items-center gap-2 text-sm">
+          <label key={option.unit} className="flex min-h-10 items-center gap-3 text-sm">
             <input
               type="radio"
               name="weight-unit"
@@ -505,7 +505,7 @@ function PlatesSection() {
             onChange={(event) => setBar(event.target.value)}
             onBlur={commitBar}
             aria-label="Bar weight"
-            className="w-20 rounded border border-border-strong bg-transparent px-2 py-1 text-sm"
+            className="text-field w-20"
           />
           <span className="text-xs text-text-muted">{weightUnit}</span>
         </label>
@@ -517,7 +517,7 @@ function PlatesSection() {
             onChange={(event) => setPlates(event.target.value)}
             onBlur={commitPlates}
             aria-label="Plates on hand"
-            className="min-w-0 flex-1 rounded border border-border-strong bg-transparent px-2 py-1 text-sm"
+            className="text-field min-w-0 flex-1"
           />
         </label>
         <button
@@ -582,8 +582,8 @@ function SpendSection({ spend }: { readonly spend: GetSpendSummaryResult }) {
     <section className="mt-8 border-t border-border pt-4 pb-4">
       <h3 className="text-[1.0625rem] leading-snug font-semibold">Spend</h3>
       <p className="mt-1 text-sm leading-snug text-text-muted">
-        Reporting, not control — cost is deliberately uncapped (ADR 0013, ADR 0014). Token counts from the Agent
-        SDK, not a dollar bill (ADR 0005).
+        Tokens each coach run used, as reported by the agent. This is a record, not a limit: nothing here caps
+        spend.
       </p>
 
       <h4 className="mt-4 font-numeric text-[0.6875rem] tracking-widest text-text-muted uppercase">
@@ -625,7 +625,7 @@ function SpendSection({ spend }: { readonly spend: GetSpendSummaryResult }) {
               {" · "}
               {new Date(run.ranAt).toLocaleString()}
               {" · "}
-              {run.model ?? "SDK default"}
+              {run.model ?? "default model"}
               {" · "}
               {formatTokens(run.usage)} tokens
               {run.stages.length > 1 && (

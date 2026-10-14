@@ -150,6 +150,7 @@ describe("production server serving the web client (Step 2A / task 2A.6)", () =>
 
   const INDEX_HTML = "<!doctype html><html><body>repcoach-web-client</body></html>";
   const APP_JS = "console.log('repcoach');";
+  const MANIFEST = '{"name":"RepCoach"}';
 
   beforeAll(async () => {
     dbPath = path.join(os.tmpdir(), `repcoach-prod-static-${randomUUID()}.sqlite`);
@@ -157,6 +158,7 @@ describe("production server serving the web client (Step 2A / task 2A.6)", () =>
     fs.mkdirSync(path.join(staticDir, "assets"), { recursive: true });
     fs.writeFileSync(path.join(staticDir, "index.html"), INDEX_HTML);
     fs.writeFileSync(path.join(staticDir, "assets", "app.js"), APP_JS);
+    fs.writeFileSync(path.join(staticDir, "manifest.webmanifest"), MANIFEST);
 
     const { layer, nodeServer } = makeProductionServer({
       port: 0,
@@ -203,6 +205,15 @@ describe("production server serving the web client (Step 2A / task 2A.6)", () =>
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toContain("text/javascript");
     expect(await response.text()).toBe(APP_JS);
+  });
+
+  // Served as octet-stream under nosniff, the browser ignores the manifest and
+  // "Add to Home Screen" degrades to a bookmark.
+  it("GET the web app manifest serves it as application/manifest+json", async () => {
+    const response = await fetchWithRetry(`${baseUrl}/manifest.webmanifest`);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("application/manifest+json");
+    expect(await response.text()).toBe(MANIFEST);
   });
 
   it("an unknown path falls back to the SPA shell (client-side routing)", async () => {

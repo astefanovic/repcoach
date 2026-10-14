@@ -727,11 +727,6 @@ function SessionEditor({
         + Add exercise from catalog
       </button>
 
-      {/* ADR 0007's deferrals, stated where you would go looking for them */}
-      <p className="mt-3 font-numeric text-[0.625rem] leading-relaxed tracking-wide text-text-faint uppercase">
-        Not in v1: EMOM / AMRAP authoring · prescribed warmups · progression rules. Every target
-        here is hand-entered.
-      </p>
 
       <ChangeLedger changes={editor.changes} canUndo={editor.canUndo} onUndo={editor.undoLast} />
 
