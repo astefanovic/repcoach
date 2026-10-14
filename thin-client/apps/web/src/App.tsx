@@ -69,7 +69,7 @@ import { Plan } from "./surfaces/Plan.tsx";
 import { Progress } from "./surfaces/Progress.tsx";
 import { Settings } from "./surfaces/Settings.tsx";
 import { Stats } from "./surfaces/Stats.tsx";
-import { Placeholder, SurfaceError, Today, TodayEmptyState } from "./surfaces/Today.tsx";
+import { Loading, SurfaceError, Today, TodayEmptyState } from "./surfaces/Today.tsx";
 import type { StripState } from "./ui/chrome.ts";
 import type { ChromeBadges, Dest } from "./ui/Shell.tsx";
 import { ModeShell, Shell } from "./ui/Shell.tsx";
@@ -210,7 +210,7 @@ function BootGate({
   return state.status === "failed" ? (
     <SurfaceError title="Runtime failed to start" reason={state.cause} />
   ) : (
-    <Placeholder title="Starting" />
+    <Loading title="Starting" />
   );
 }
 
@@ -246,7 +246,7 @@ function TodaySurface() {
       // Story 38: an honest error state rather than an empty surface.
       <SurfaceError title="Could not load your plan" reason={planState.reason} />
     ) : (
-      <Placeholder title="Loading your plan" />
+      <Loading title="Loading your plan" />
     );
   }
 
@@ -353,7 +353,7 @@ function PlanSurface() {
     return planState.status === "failed" ? (
       <SurfaceError title="Could not load your plan" reason={planState.reason} />
     ) : (
-      <Placeholder title="Loading your plan" />
+      <Loading title="Loading your plan" />
     );
   }
   return (
@@ -399,7 +399,7 @@ function PlanEditorSurface({
     return <SurfaceError title="Could not load the exercise catalog" reason={catalogState.reason} />;
   }
   if (catalogState.status !== "ready") {
-    return <Placeholder title="Loading the exercise catalog" />;
+    return <Loading title="Loading the exercise catalog" />;
   }
 
   return (
@@ -566,7 +566,7 @@ function LogRoute() {
           {state.status === "failed" ? (
             <SurfaceError title="Runtime failed to start" reason={state.cause} />
           ) : (
-            <Placeholder title="Starting" />
+            <Loading title="Starting" />
           )}
         </ModeShell>
       )}
@@ -614,7 +614,7 @@ function LogSurface() {
                 onRetry={refresh}
               />
             ) : (
-              <Placeholder title="Opening the session" />
+              <Loading title="Opening the session" />
             )}
           </ModeShell>
         )}

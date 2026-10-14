@@ -191,8 +191,7 @@ export function Today({
 
         {/* D's full coach output, not a summary of it — the evidence tables,
             the named rule, the trust-marked sources and the "where this could
-            be wrong" block. Still fixture-fed: the Coach surface is its own
-            ticket, and #72 is explicit that Coach is out of scope. */}
+            be wrong" block. */}
         <section className="mt-8 @2xl:mt-0">
           <CoachOutput />
         </section>
@@ -282,11 +281,12 @@ export function TodayEmptyState({
   );
 }
 
-export function Placeholder({ title }: { readonly title: string }) {
+/** What a surface shows while its data is on the way. */
+export function Loading({ title }: { readonly title: string }) {
   return (
-    <div className="grid min-h-64 place-items-center p-10 text-center">
+    <div className="grid min-h-64 place-items-center p-10 text-center" role="status">
       <p className="font-numeric text-[0.6875rem] tracking-widest text-text-faint uppercase">
-        {title} — not built yet
+        {title}…
       </p>
     </div>
   );
