@@ -21,8 +21,8 @@ import { fileURLToPath } from "node:url";
  * here — uncommitted edits do not move `HEAD`, and marking the ref `-dirty`
  * would fire on every session of ordinary development without telling anyone
  * anything they could act on. Editing without rebuilding is the *launcher's*
- * job to catch (`Start-RepcoachServer.ps1` compares the build's mtime against
- * the sources). This check answers the other question: are the running server
+ * job to catch (`cli.ts` compares the build's mtime against the sources
+ * before every start). This check answers the other question: are the running server
  * and the served bundle the same commit at all.
  */
 

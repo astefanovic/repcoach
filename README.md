@@ -74,9 +74,9 @@ phone browser ──(Tailscale)──> home server (Node)
 - **Claude Code, signed in** on the machine that runs the server. The coach
   runs through the [Claude Agent SDK](https://docs.claude.com/en/api/agent-sdk/overview),
   which uses that login, so coaching spends your Claude subscription quota.
-- **[Tailscale](https://tailscale.com)** on the server and your phone. It is
-  how the phone reaches the server, and it is the only access control the
-  server has.
+- **[Tailscale](https://tailscale.com)** on the server and your phone, with
+  [HTTPS certificates](https://tailscale.com/kb/1153/enabling-https) turned on
+  for the tailnet. It is how the phone reaches the server.
 
 ## Quick start
 
@@ -100,26 +100,37 @@ database seeded with a demo plan, so nothing you log there is kept.
 ```sh
 cd thin-client
 pnpm install
-pnpm --filter @repcoach/web build
-pnpm --filter @repcoach/dev-server start   # serves app + RPC on 127.0.0.1:4020
-tailscale serve --bg 4020                  # https://<machine>.<tailnet>.ts.net
+pnpm repcoach install
 ```
 
-Open the `https://…ts.net` URL on your phone and add it to your home screen.
-On Windows, `scripts/Start-RepcoachServer.ps1` does all of the above for you.
+This builds the web client, starts the server on `127.0.0.1:4020` and opens
+**Settings → Server** in your browser, already paired. From there:
 
-The full walkthrough, including keeping the server running and backing up
-your data, is in **[docs/self-hosting.md](docs/self-hosting.md)**.
+- **Phone access.** The server puts Tailscale Serve in front of itself and shows
+  the `https://<machine>.<tailnet>.ts.net/` URL to open on your phone. If
+  something is missing, such as HTTPS certificates being off for the tailnet,
+  it says what to fix and checks again every minute.
+- **Pair a device.** Shows a QR code. Scan it with your phone, then add the page
+  to your home screen.
+- **Install as background service.** Keeps the server running after you close
+  the terminal, starts it at logon and restarts it if it stops. Windows, Linux
+  (systemd) and macOS (launchd), no admin rights needed.
+
+`pnpm repcoach status` and `pnpm repcoach pair` do the same from a terminal.
+The full walkthrough, including backups, is in
+**[docs/self-hosting.md](docs/self-hosting.md)**.
 
 ## Security model
 
 RepCoach is built for one person on a private network:
 
-- **There is no login.** Anyone who can reach the server can read and change
-  every workout, and can start coaching runs that spend your Claude quota.
-- **Tailscale is the access control.** The server binds to `127.0.0.1` by
-  default and `tailscale serve` exposes it to your tailnet only. Never put it
-  on the public internet, and never use `tailscale funnel` with it.
+- **Devices have to be paired.** The server answers only browsers that have
+  redeemed a one-time pairing code, from Settings or `pnpm repcoach pair`.
+  Paired devices are listed in Settings, where you can revoke them. There are
+  no accounts: every paired device has full access.
+- **Tailscale is the network boundary.** The server binds to `127.0.0.1` and
+  Tailscale Serve exposes it to your tailnet only, over HTTPS. Never put it on
+  the public internet, and never use `tailscale funnel` with it.
 - **Coaching agents run tools on the server.** Agent sessions run with Bash and
   web access and without permission prompts, from an empty scratch directory,
   against a read-only snapshot of your data. This is not a sandbox, so run

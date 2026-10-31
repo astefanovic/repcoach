@@ -384,14 +384,13 @@ already serves the built web client at all times
 that URL in the phone's browser over Tailscale and using the app for real.
 
 ```powershell
-# Ensure the server is up (see docs/ops/repcoach-server.md for the persistence
-# options — Start-RepcoachServer.ps1 or the Startup-folder launcher):
-scripts/Start-RepcoachServer.ps1
+# Ensure the server is up — or `pnpm repcoach status` if the background service runs it:
+cd thin-client; pnpm repcoach install
 ```
 
-Then, on the phone, open the tailnet URL the script prints (same host, same port
-the server binds to — see the ops doc for the current default). No pairing, no
-adb, no wireless-debugging setup: any browser on the tailnet reaches it.
+Then, on the phone, open the tailnet URL shown in Settings → Server. A phone that
+isn't paired yet shows "Pair this device": scan the QR from Settings → Server →
+Pair a device (or `pnpm repcoach pair`). No adb, no wireless-debugging setup.
 
 ---
 
@@ -418,5 +417,5 @@ pnpm --filter @repcoach/e2e test flows/<file>.spec.ts  # rung 2 — one spec fil
 $env:REPCOACH_AGENT_MODE='replay'             # rung 2a — real adapters, recorded
 pnpm --filter @repcoach/e2e test --grep '@agents'      # ...and ONLY the @agents specs
 pnpm --filter @repcoach/dev-server cassettes:restamp   # after a safe prompt edit
-scripts/Start-RepcoachServer.ps1              # rung 3 — serve for UAT (repo root)
+pnpm repcoach install                         # rung 3 — serve for UAT, opens Settings → Server
 ```

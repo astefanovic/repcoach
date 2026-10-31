@@ -16,6 +16,7 @@
 // | `/history` | History (#114) — off Today, not a fifth dock destination |
 // | `/stats` | Stats (#117) — same call as History |
 // | `/progress` | Progress — e1RM and volume per lift, bodyweight; same call again |
+// | `/pair` | Where a pairing link lands; outside the pairing gate below |
 //
 // Both stub surfaces named in earlier revisions of this comment are now real:
 // the Coaching feed shipped as #79's Coach record, and Settings ships here
@@ -36,6 +37,8 @@ import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from "re
 import type { LoggedSessionId, PlanSnapshot, SessionId } from "@repcoach/contracts";
 
 import { IntakeTakeover } from "./intake/IntakeTakeover.tsx";
+import { usePairingState } from "./runtime/serverAccess.ts";
+import { PairRoute, UnpairedScreen } from "./surfaces/Pairing.tsx";
 import { startWorkout } from "./runtime/commands.ts";
 import { useInFlightSession, type InFlightSession } from "./runtime/inFlightSession.ts";
 import { useInFlightReconciliation } from "./runtime/useInFlightReconciliation.ts";
@@ -738,6 +741,15 @@ function IntakeDoorClosed({
 /* --------------------------------------------------------------------- routes */
 
 export function App() {
+  const location = useLocation();
+  const pairing = usePairingState();
+
+  // The production server answers only paired devices. An unpaired one still
+  // has its local data, but nothing it does could reach the server, so it is
+  // told how to pair instead of being left on a connection that never comes.
+  if (location.pathname === "/pair") return <PairRoute />;
+  if (pairing.state === "unpaired") return <UnpairedScreen onRecheck={pairing.recheck} />;
+
   return (
     <div className="min-h-dvh bg-canvas">
       <Routes>

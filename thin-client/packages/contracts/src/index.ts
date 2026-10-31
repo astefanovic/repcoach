@@ -13,4 +13,5 @@ export * from "./dataExport.ts";
 export * from "./progress.ts";
 export * from "./bodyweight.ts";
 export * from "./workoutImport.ts";
+export * from "./serverAdmin.ts";
 export * from "./rpc.ts";

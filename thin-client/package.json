@@ -6,6 +6,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "repcoach": "pnpm --silent --filter @repcoach/dev-server cli",
     "test": "node scripts/run-tests.mjs",
     "test:vitest": "vitest run",
     "test:watch": "vitest",

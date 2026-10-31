@@ -31,6 +31,7 @@ import { describeFailure } from "../runtime/rpc.ts";
 import { useRuntime } from "../runtime/RuntimeProvider.tsx";
 import { setPlateSetup, usePlateSetup } from "../runtime/plateSetup.ts";
 import { setWeightUnit, useWeightUnit } from "../runtime/weightUnit.ts";
+import { ServerSection } from "./ServerSection.tsx";
 import { WorkoutImportSection } from "./WorkoutImport.tsx";
 import { CONFIGURABLE_CADENCES, useSettings, type CadenceModelState } from "../runtime/useSettings.ts";
 
@@ -94,6 +95,9 @@ export function Settings({ offline }: { readonly offline: boolean }) {
       <RestTimerNotifySection />
       <WeightUnitSection />
       <PlatesSection />
+      {/* Read over plain HTTP, not the RPC socket, so it still answers while the
+          coach connection is down — and it is where a broken connection gets fixed. */}
+      <ServerSection />
 
       {offline && (
         <p className="mt-4 text-sm leading-snug text-text-muted">

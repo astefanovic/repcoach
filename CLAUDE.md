@@ -53,8 +53,9 @@ opening the served URL on the phone browser over Tailscale. See
   `live` refuses to start from a coding-agent session unless
   `REPCOACH_AGENT_LIVE_OK=1` is set; prefer `replay` and the canned dev-server
   when a real run isn't the point.
-- `scripts/Start-RepcoachServer.ps1` — serves the built web client for final UAT;
-  the phone just opens the tailnet URL in its browser. Run only after e2e is
-  green.
+- `pnpm repcoach install` (from `thin-client/`) — serves the built web client for
+  final UAT and opens Settings → Server, where phone access, pairing and the
+  background service live; the phone opens the tailnet URL once paired. Run
+  only after e2e is green.
 
 Human UAT also carries `docs/design/uat-watchlist.md` — the design decisions daily-driving is meant to settle. The rungs prove the app does what it was built to do; the watchlist asks whether it was worth building that way.

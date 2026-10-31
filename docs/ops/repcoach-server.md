@@ -1,197 +1,166 @@
-# RepCoach production server & web client — the full Step 2A setup
+# RepCoach production server & web client
 
 **Audience: the next agent (or human) touching the always-on home-server setup.**
 This is the single explainer for how the phone-facing production deployment
 works, every non-obvious decision in it, and the traps that already bit us.
 Read this before changing anything under `thin-client/apps/dev-server`,
-`scripts/*.ps1`, or the web build.
+`scripts/*.ps1`, or the web build. The owner-facing walkthrough is
+[`docs/self-hosting.md`](../self-hosting.md); the decision is
+[ADR 0024](../adr/0024-the-server-owns-its-own-exposure-and-devices-pair.md).
 
 ## The model (copied from t3code)
 
-The UX contract: **start the server, open its URL in any tailnet browser
-(the Pixel 7), done.** No Metro, no Expo Go, no QR, no build-time URL baking.
+The UX contract: **`pnpm repcoach install`, then everything else from
+Settings → Server.** The server publishes itself over Tailscale, pairs devices
+and installs its own background service; no launcher script has to get any of
+that right.
 
 ```
-Pixel 7 browser ──(tailnet)──> production server (Windows home host)
-   GET /            ── serves the built web client (apps/web dist/, Vite)
-   GET /assets/…    ── static, SPA-fallback to index.html
-   WS  /rpc         ── Effect-RPC NDJSON — the same origin that served the page
-   ↳ SQLite at %USERPROFILE%\.repcoach\repcoach.sqlite  (survives restarts)
+phone browser ──(tailnet, https)──> tailscale serve ──> production server (127.0.0.1:4020)
+   GET /                            ── the built web client (apps/web dist/, Vite) — public
+   GET /.well-known/repcoach/server ── identity probe — public
+   GET/POST /api/auth/*             ── pairing — public
+   WS /rpc, /api/server/*           ── paired devices only (session cookie)
+   ↳ ~/.repcoach/: repcoach.sqlite · server-secret · repcoach.auth.json · repcoach.runtime.json · logs/
 ```
 
-- **Server**: `thin-client/apps/dev-server/src/prodIndex.ts` (`pnpm --filter
-  @repcoach/dev-server start`). Serves `/rpc` + the static client
-  (`staticFiles.ts`, mirrored from t3code's `staticAndDevRouteLayer`).
-  **No `/__test__/*` control channel in this build** — that's dev-only, and a
-  prod server exposing reset/drop-socket would let anyone on the tailnet wipe
-  real logged data. Config via env: `PORT` (4020), `HOST` (127.0.0.1),
-  `REPCOACH_DB_PATH`, `REPCOACH_STATIC_DIR` (default `apps/web/dist`).
-- **Client**: `apps/web`, a plain Vite + React web app (ADR 0012 — the native
-  Android app and the Expo/React Native thin client are both retired). It
-  derives its server URL from `window.location.origin` in production builds
-  (`Connection.resolveServerBaseUrls`, mirroring t3code's
-  `primary/target.ts`). Precedence: explicit dev-server env overrides (used by
-  the deliberately cross-origin Playwright e2e harness) → same-origin
-  (production build) → localhost dev defaults.
-
-## Scripts (repo `scripts/`)
-
-| Script | What it does |
+| File (`apps/dev-server/src/`) | Role |
 |---|---|
-| `Start-RepcoachServer.ps1` | The one command. Pins Node, builds the web client if missing (`pnpm --filter @repcoach/web build`), sets up tailnet exposure (serve or fallback), prints the phone URL, runs the server in the foreground. |
-| `Install-RepcoachServer-Startup.ps1` | **No-admin persistence** (default). Drops a logon launcher in the Startup folder so the server auto-starts every logon, independent of any terminal/agent. `-StartNow` launches it immediately. |
-| `Install-RepcoachServer-Service.ps1` | Elevated; NSSM Windows service (survives reboot even with no logon). Needs NSSM + admin. |
-| `Register-RepcoachServer-Task.ps1` | Scheduled Task at logon. **Requires elevation on this host** (`Register-ScheduledTask`/`schtasks` both return Access Denied non-elevated). |
+| `productionMain.ts` | Boots everything below; env config. `prodIndex.ts` and `cli.ts` both call it. |
+| `cli.ts` | `pnpm repcoach install / start / pair / status`. Rebuilds a stale web client before starting. |
+| `serverAuth.ts` | Pairing codes (HMAC, one use, 15 min) and hashed sessions. |
+| `serverAdmin.ts` | The auth gate (`HttpRouter.serve` middleware, so it sees WebSocket upgrades) and the admin routes. |
+| `tailscale.ts`, `tailscaleExposure.ts` | Tailscale CLI calls (bounded, stderr reduced to a label) and the every-minute check that keeps Serve pointed here. |
+| `serviceManager.ts` | Background service per platform: Startup-folder loop, systemd user unit, LaunchAgent. |
+| `runtimeState.ts` | `<db>.runtime.json`: pid, port, instance id — how the CLI finds the running server. |
+
+The client derives its server URL from `window.location.origin` in production
+builds (`Connection.resolveServerBaseUrls`). The pairing gate and the Server
+section in Settings switch themselves off for the dev-server and the
+cross-origin e2e harness (`apps/web/src/runtime/serverAccess.ts`), which have
+neither.
+
+**No `/__test__/*` control channel in this build** — that's dev-only, and a
+prod server exposing reset/drop-socket would let anyone wipe real logged data.
 
 ## Keeping it running (the #1 recurring failure)
 
 **Symptom seen repeatedly:** the phone hangs/times out even though every
 server-side check passes. Root cause was almost always **the server process
-being gone by the time the phone connects** — during development it was
-launched as an *agent background task*, which the harness kills on session
-teardown. It is NOT (usually) a code, firewall, or Tailscale problem.
+being gone by the time the phone connects** — launched from a terminal or an
+agent background task that was later closed.
 
-**Fix — pick one, all independent of any agent session:**
-- `./scripts/Install-RepcoachServer-Startup.ps1 -StartNow` — no admin;
-  auto-starts every logon. **Default.** (Launch the Startup `.cmd` by
-  double-click, or `Start-Process`, to start it now without logging out —
-  launching via `explorer.exe <cmd>` did NOT work, use the `.cmd` directly.)
-- Run `./scripts/Start-RepcoachServer.ps1` in your own PowerShell window and
-  leave it open — simplest, survives as long as the window is open.
-- Elevated + reboot-proof-without-logon: `Install-RepcoachServer-Service.ps1`
-  (NSSM) or `Register-RepcoachServer-Task.ps1` (Scheduled Task).
+**Fix:** Settings → Server → **Install as background service**.
+`pnpm repcoach status` says whether the running server is the service's or a
+hand-started one.
 
-Verify it's actually up and owned by something other than your shell:
-`Get-NetTCPConnection -LocalPort 4020 -State Listen` → PID's parent should be
-`node.exe`/`explorer.exe`, not your terminal.
+**The handover trap.** Installing from the UI happens on a hand-started
+server, which then has to start the service and exit. A child spawned with
+`detached: true` did **not** survive that exit when the server was itself
+started from an agent session: it died with the parent's job object. The
+Windows flavour therefore has WMI (`Win32_Process.Create`) start the
+launcher, which puts it outside the job, and the server waits for that call to
+return before exiting. Verified live on 2026-10-31: install, handover, restart
+and remove all worked from the UI against a scratch instance.
 
-## Trap 1 (retired) — the `expo export` blank-screen bug
+The elevated scripts remain for a server that must run with nobody logged in:
+`Install-RepcoachServer-Service.ps1` (NSSM) and `Register-RepcoachServer-Task.ps1`
+(Scheduled Task). Both run `Start-RepcoachServer.ps1`, now a thin wrapper over
+`pnpm repcoach start`. Settings reports an NSSM install, and the old
+Startup-folder `RepcoachServer.cmd`, as legacy launchers; installing the new
+service deletes the `.cmd`.
 
-The native/Expo React Native client, and with it the `expo export` white-screen
-bug that used to crash on module load (`Schema` reading `.reasons` off an
-undefined issue; upstream [Effect-TS/effect#6252](https://github.com/Effect-TS/effect/issues/6252)),
-is gone (ADR 0012, #53). `apps/web` builds with a plain Vite production build
-and has never needed a workaround for it. This section is kept only as a
-pointer for anyone who finds a reference to it in old history — there is
-nothing left to re-check or retire.
+## Phone access: https only, set up by the server
 
-## Trap 2 — Windows Firewall silently blocks the phone
-
-**Symptom:** every local probe works (even against the tailnet IP — loopback
-doesn't traverse the firewall), but the phone hangs forever connecting.
-
-**Cause:** auto-created inbound **Block** rules for
-`%USERPROFILE%\AppData\Roaming\nvm\v26.5.0\node.exe` (a dismissed Windows
-firewall popup). Block beats Allow. The firewall matches the **resolved**
-path — the `C:\Program Files\nodejs` symlink's Allow rules don't help.
-
-**Status (2026-07-17): RESOLVED** — the user approved node network access via
-the Windows popup, which replaced the Block rules with Allow rules for the nvm
-node on Private+Public. The server now runs fine on the system Node 26.5.0 when
-direct-binding. The guard below stays as a safety net in case the Block rules
-ever reappear.
-
-**Guard:** when direct-binding (`HOST=0.0.0.0`),
-`Start-RepcoachServer.ps1` detects Block rules against the resolved system
-node and runs the server on the **portable Node**
-(`%USERPROFILE%\node-portable\node-v22.23.1-win-x64`, has an Allow rule and
-`node:sqlite`). The proper fix if they reappear (elevated, one-time):
-
-```powershell
-Get-NetFirewallRule -Direction Inbound -Action Block |
-  Where-Object { ($_ | Get-NetFirewallApplicationFilter).Program -ieq "$env:USERPROFILE\AppData\Roaming\nvm\v26.5.0\node.exe" } |
-  Remove-NetFirewallRule
-```
-
-`tailscale serve` mode does not have this problem at all — tailscaled owns
-the inbound connection and proxies to loopback.
-
-## Trap 3 (resolved) — `tailscale serve` blocks forever when the tailnet gate is off
-
-The first-ever `tailscale serve` on a tailnet needs an admin to enable HTTPS
-Certificates (the CLI prints an enable link and then **polls forever**).
-
-**Resolved 2026-08-25**: `tailscale serve status` shows
-`https://<host>.<tailnet>.ts.net` → `http://127.0.0.1:4020`, and
-`tailscale status --json` reports a non-empty `CertDomains`. Serve config is
-persistent, so this stays true across reboots and the script now *detects* it
-rather than re-issuing the command — see the next section.
-
-## The https URL is not cosmetic — it is the only one with working web APIs
-
-This is the trap that replaced trap 3, and it is nastier because nothing on
-screen reports it.
-
-A tailnet host can answer on **two** URLs at once:
+A tailnet host could once answer on **two** URLs at once:
 
 | URL | Origin | Reaches the app? |
 | --- | --- | --- |
 | `https://<magic-dns>` (via `tailscale serve`) | **secure context** | yes |
 | `http://<magic-dns>:4020` (direct bind) | insecure | yes |
 
-Browsers withdraw a whole class of API on an insecure origin, **silently** —
-no exception the app can catch, no error state it can render:
+Browsers withdraw a whole class of API on an insecure origin, **silently**:
+`Notification` (the rest timer's off-tab alert), `navigator.wakeLock`, service
+workers. So the plain-http fallback is gone. The server binds loopback, and
+`tailscaleExposure.ts`:
 
-- `Notification` — the rest timer's off-tab alert (#116 part 2) is dead
-- `navigator.wakeLock` — the screen cannot be held awake mid-set
-- service workers — no offline install
+- reads `tailscale status --json` and refuses to run `tailscale serve` while
+  the tailnet has no HTTPS certificates (the node's `https` capability, or
+  `CertDomains` on older CLIs) — `serve` blocks forever waiting on an admin
+  click in that state;
+- leaves an existing mapping to this port alone, and **never takes a Serve port
+  whose target still answers** — the real server, seen from a commissioning
+  run, or an older RepCoach without the identity route;
+- proves success by fetching `https://…ts.net/.well-known/repcoach/server` and
+  matching this process's `instanceId`, rather than trusting the exit code;
+- does **not** remove the mapping on shutdown (unlike t3code): the phone's
+  bookmark and home-screen app should survive a supervised restart;
+- re-checks every minute, so turning on HTTPS certificates in the admin console
+  takes effect without a restart. That click is the owner's, not an agent's.
 
-The realistic way to get bitten: the phone bookmarked the `http` URL during
-the period when Serve was still pending, and kept using it long after Serve
-started working. **When a web-platform capability seems inexplicably broken on
-the phone, check which URL the phone actually has bookmarked before debugging
-any code.**
+When a web-platform capability seems inexplicably broken on the phone, still
+check which URL it has bookmarked first: an old `http://…:4020` bookmark from
+the fallback days stops answering once the server binds loopback.
 
-What `Start-RepcoachServer.ps1` does about it:
+## Pairing
 
-- Checks `tailscale serve status --json` first and reuses an existing binding,
-  matching the proxy target explicitly so a stale config pointing at another
-  port is not mistaken for success.
-- Reads `CertDomains` from `tailscale status --json` to tell "never set up"
-  from "set up but failing", so it can skip a command that would only block.
-- Verifies the binding after running `tailscale serve`, rather than trusting
-  the exit code.
-- On success, binds loopback and prints exactly one URL — the `http` one stops
-  answering, which is the point.
-- On failure, still falls back (a broken tailnet must never lock you out of
-  your own server) but prints a yellow banner naming each API being lost and
-  the exact admin-console steps to fix it. `-RequireHttps` turns that fallback
-  into a hard failure instead.
+Tailscale used to be the only access control. Now `/rpc` and `/api/server/*`
+require a session cookie (`repcoach_session`, httpOnly, `SameSite=Strict`,
+`Secure` behind Serve), issued by redeeming a one-time pairing code:
 
-**The admin-console step is yours, not an agent's**: enabling HTTPS
-Certificates at <https://login.tailscale.com/admin/dns> is an authenticated
-account-settings action. Everything after it — the CLI call, the verification,
-the URL — the script handles.
+- Codes are `<expiry>.<nonce>.<hmac>` under `server-secret`, so the `pair` CLI
+  mints them from the file without talking to the server. Spent nonces are
+  recorded in `<db>.auth.json` until expiry.
+- Sessions and runtime state are named after the **database**, not the
+  directory: a commissioning server on `commissioning.sqlite` beside the real
+  `repcoach.sqlite` keeps its own paired devices instead of overwriting them.
+- Links put the code in the **fragment** (`/pair#code=…`): the server's request
+  logger records full URLs, and a fragment is never sent.
+- There is no loopback exemption — Tailscale Serve proxies from 127.0.0.1 too.
+  `pnpm repcoach install` pairs this machine's browser by opening a pairing
+  link instead.
+- WebSocket upgrades and POSTs with a mismatched `Origin` are refused
+  (cross-site WebSocket hijacking), compared against `X-Forwarded-Host` behind
+  Serve.
 
-## Node runtime matrix
+## Node runtime
 
-| Node | Where | node:sqlite | Inbound firewall | Used for |
-|---|---|---|---|---|
-| nvm 26.5.0 (system, `C:\Program Files\nodejs` symlink) | resolved `…\Roaming\nvm\v26.5.0` | yes | **BLOCKED** | builds; server in tailscale-serve (loopback) mode |
-| portable 22.23.1 (`%USERPROFILE%\node-portable\…`) | fixed path | yes | Allowed | server in direct-bind mode; vitest/tsc (see memory) |
-| old MSI 22.11 | uninstalled | no | — | (gone; used to occupy nvm's symlink path) |
+Any Node ≥ 22.16. The service pins the binary that was running `install`
+(`process.execPath`), so an nvm switch later does not move it. The old
+firewall trap (Windows auto-created inbound **Block** rules for nvm's
+`node.exe`) only ever affected direct binding; with loopback-only binding,
+tailscaled owns the inbound connection and the portable-Node workaround is
+gone.
 
 ## Verification checklist (after any change here)
 
 ```powershell
-# 1. unit/integration: 120+ tests incl. static serving, same-origin resolver,
-#    restart durability (productionDurability.test.ts), no-test-channel
-cd thin-client; pnpm exec vitest run
-# 2. typecheck (warm first — TS6310 on cold cache is a known repo quirk)
-pnpm -w exec tsc -b; pnpm -w exec tsc -b --noEmit
-# 3. real page render (catches bundler regressions the unit tests can't) —
-#    the Playwright suite under thin-client/e2e/ is the tool for this now.
-pnpm exec playwright test --config e2e/playwright.config.ts
+cd thin-client
+pnpm test                         # every unit/integration suite
+pnpm -w exec tsc -b               # typecheck (warm; TS6310 on a cold cache is a known quirk)
+pnpm --filter @repcoach/e2e test  # Playwright; clear ports 4010/4011/5173/5174 first
+```
+
+To exercise the admin flow live without touching the real server, run a
+scratch instance on another port, Serve port and data directory. Setting
+`APPDATA` to a scratch folder for that process also keeps a test service
+install out of the real Startup folder:
+
+```powershell
+$env:PORT = "4041"; $env:REPCOACH_TAILSCALE_SERVE_PORT = "8443"
+$env:REPCOACH_DB_PATH = "$env:TEMP\repcoach-scratch\repcoach.sqlite"
+$env:APPDATA = "$env:TEMP\repcoach-scratch\appdata"
+pnpm repcoach install
+# afterwards: tailscale serve --https=8443 off
 ```
 
 ## Phone flow (rung-3 UAT)
 
-1. `./scripts/Start-RepcoachServer.ps1` (or the NSSM service).
-2. Open the printed URL in the phone's browser (same tailnet). It must be the
-   `https://` one — if the script printed a yellow INSECURE FALLBACK banner
-   instead, fix that first or the rest timer cannot notify you off-tab.
-3. Log a set → restart the server → reload → the set must still be there
-   (that's the G5 durability artifact; automated equivalent:
+1. `pnpm repcoach install` (or nothing, if the service runs).
+2. Settings → Server → Pair a device; scan the QR with the phone. It must land
+   on the `https://` URL.
+3. Log a set → **Restart server** → reload → the set must still be there
+   (the G5 durability artifact; automated equivalent:
    `productionDurability.test.ts`).
 
 ## The real agent path (commissioned 2026-08-05, issue #93)
@@ -219,10 +188,13 @@ is running. When a server is only needed to test against, use the dev-server
   -DbPath $env:USERPROFILE\.repcoach\commissioning.sqlite
 ```
 
-Then open the printed URL, go to `/intake`, and drive: draft → answer the
+Add `-Open` to have it open this machine's browser already paired; otherwise
+the page asks to pair, and a link comes from the same settings:
+`$env:REPCOACH_DB_PATH = "$env:USERPROFILE\.repcoach\commissioning.sqlite"; pnpm repcoach pair`
+(from `thin-client/`). Then go to `/intake` and drive: draft → answer the
 coach's question → **Review the sources** → **Accept**. Finish a session from
 Today to fire a live Session review. `.claude/launch.json`'s `commissioning`
-entry is the same thing for the Browser pane.
+entry is the same thing for the Browser pane — open the `pair` link there.
 
 Delete the DB (`Remove-Item ~/.repcoach/commissioning.sqlite*`) to run Intake
 again — the accepted Plan is what closes that door.
@@ -421,24 +393,17 @@ committed Decision cites real entry ids and per-session rep counts and fills
 
 ## Open items for the next agent
 
-- **Tailscale serve enablement** — DONE (verified 2026-08-25). The script now
-  binds loopback and prints `https://<host>.<tailnet>.ts.net`, so the
-  firewall trap is irrelevant in the normal path. Remaining action is on the
-  *phone*: re-bookmark the https URL and delete any `http://…:4020` one, or
-  notifications and wake lock stay silently disabled.
-- **Firewall Block rules** — REMOVED (user approved the node popup 2026-07-17);
-  system Node direct-bind works. Guard remains if they reappear.
-- **Persistence** — a Startup-folder launcher is installed
-  (`Install-RepcoachServer-Startup.ps1`), so the server auto-starts at logon.
-  An elevated NSSM service / Scheduled Task is still the only reboot-proof-
-  without-logon option (both blocked non-elevated on this host).
-- **Playwright 14-flow suite** — GREEN as of 2026-07-19: all 14 flows pass
-  against the merged same-origin build (cross-origin env override preserved
-  for the e2e harness). Re-run after any web-build or contract change.
+- **First pairing on the owner's phone** after this change: the phone shows
+  "Pair this device" until `pnpm repcoach pair` (or Settings on the PC) is
+  scanned. Unsynced sets stay in its outbox meanwhile.
+- **Linux and macOS services** are implemented and unit-tested, not run.
+- **Playwright suite** — re-run after any web-build or contract change.
 
 ## Teardown
 
 ```powershell
+# Settings → Server → Remove service, or by hand:
+Remove-Item "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\RepcoachServer.vbs", "$env:USERPROFILE\.repcoach\service\run-server.cmd"
 nssm stop RepcoachServer; nssm remove RepcoachServer confirm   # if installed
 tailscale serve --https=443 off                                # if serve was set
 ```

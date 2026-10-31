@@ -24,6 +24,7 @@ import { makeRealDeliberationRunnerLayer } from "./deliberationRunner.ts";
 import type { QuotaService } from "./quotaService.ts";
 import { CannedModelCatalog, ModelCatalog, RealModelCatalog } from "./modelCatalog.ts";
 import { RpcHandlersLayer } from "./rpcHandlers.ts";
+import { makeAuthMiddleware, makeServerAdminRoutesLayer, type ServerAdminContext } from "./serverAdmin.ts";
 import { makeSessionReviewDrainLayer, type SessionReviewDrainConfig } from "./sessionReviewDrain.ts";
 import { makeStaticRoutesLayer } from "./staticFiles.ts";
 import { makeTestControlRoutesLayer } from "./testControl.ts";
@@ -225,19 +226,28 @@ export const makeProductionServer = (options: {
    * point production at a replay.
    */
   readonly agentTransport?: AgentSdkTransport;
+  /**
+   * Pairing, phone access and the background service (`serverAdmin.ts`).
+   * `prodIndex.ts` always passes one: with it, `/rpc` and `/api/server/*`
+   * answer only paired devices. Absent — only the real-socket suites, which
+   * are about the RPC runtime — the server is open, as it was before pairing.
+   */
+  readonly admin?: ServerAdminContext;
 }): ProductionServerHandle => {
   const nodeServer = http.createServer();
 
-  const AppLayer =
+  const StaticRoutes =
     options.staticDir === undefined
-      ? RpcRuntime
-      : Layer.mergeAll(
-          RpcRuntime,
-          makeStaticRoutesLayer(options.staticDir).pipe(
-            Layer.provide(HttpRouter.layer),
-            Layer.provide([NodeFileSystem.layer, NodePath.layer]),
-          ),
+      ? Layer.empty
+      : makeStaticRoutesLayer(options.staticDir).pipe(
+          Layer.provide(HttpRouter.layer),
+          Layer.provide([NodeFileSystem.layer, NodePath.layer]),
         );
+  const AdminRoutes =
+    options.admin === undefined
+      ? Layer.empty
+      : makeServerAdminRoutesLayer(options.admin).pipe(Layer.provide(HttpRouter.layer));
+  const AppLayer = Layer.mergeAll(RpcRuntime, StaticRoutes, AdminRoutes);
 
   // `seedDemoFixtures: false` — a real user's Exercise catalog and Plan
   // start empty and are built through Intake/Deliberation, never pre-filled
@@ -297,7 +307,10 @@ export const makeProductionServer = (options: {
     Layer.provide(StoreLive),
   );
 
-  const HttpServerLive = HttpRouter.serve(AppLayer, { disableListenLog: true }).pipe(
+  const HttpServerLive = HttpRouter.serve(AppLayer, {
+    disableListenLog: true,
+    ...(options.admin === undefined ? {} : { middleware: makeAuthMiddleware(options.admin.auth) }),
+  }).pipe(
     Layer.provide([
       NodeHttpServer.layer(() => nodeServer, { port: options.port, host: options.host }),
       RpcSerialization.layerNdjson,

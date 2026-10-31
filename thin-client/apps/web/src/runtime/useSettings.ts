@@ -12,6 +12,7 @@ import {
 
 import { useRuntime, type RepCoachRuntime } from "./RuntimeProvider.tsx";
 import { callRpc, describeFailure } from "./rpc.ts";
+import { useRpcSessionEpoch } from "./useRpcSessionEpoch.ts";
 
 /**
  * The Settings destination (#81) — the last of the four top-level surfaces
@@ -91,6 +92,9 @@ const loadAll = async (runtime: RepCoachRuntime): Promise<{
 
 export function useSettings(): SettingsHandle {
   const runtime = useRuntime();
+  // Reload on every (re)connect: Settings is often the first page opened (it is
+  // where `pnpm repcoach install` lands), so the first load can race the socket.
+  const epoch = useRpcSessionEpoch(runtime);
   const [state, setState] = useState<SettingsState>({ status: "loading" });
   const [modelSaveErrors, setModelSaveErrors] = useState<ReadonlyMap<DeliberationCadence, string>>(new Map());
   const [rpeSaveError, setRpeSaveError] = useState<string | undefined>(undefined);
@@ -107,7 +111,7 @@ export function useSettings(): SettingsHandle {
     return () => {
       live = false;
     };
-  }, [runtime]);
+  }, [runtime, epoch]);
 
   const setModel = useCallback(
     (cadence: DeliberationCadence, model: string, effort: DeliberationEffort | undefined) => {
