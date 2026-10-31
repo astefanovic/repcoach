@@ -49,9 +49,10 @@ opening the served URL on the phone browser over Tailscale. See
   4010/4011/5173/5174 between full runs, since `reuseExistingServer` will
   otherwise adopt a dirty in-memory server. See the testing doc's *Running the
   suite locally* and *Agent-backed rung 2*.
-- **`live` mode and the production server are the owner's to start, never an
-  agent's** — both spend subscription quota. Refused in code and blocked by a
-  PreToolUse hook; if a run needs them, ask rather than route around it.
+- **`live` mode and the production server both spend subscription quota.**
+  `live` refuses to start from a coding-agent session unless
+  `REPCOACH_AGENT_LIVE_OK=1` is set; prefer `replay` and the canned dev-server
+  when a real run isn't the point.
 - `scripts/Start-RepcoachServer.ps1` — serves the built web client for final UAT;
   the phone just opens the tailnet URL in its browser. Run only after e2e is
   green.

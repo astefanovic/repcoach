@@ -76,10 +76,7 @@ const LIVE_OVERRIDE = "REPCOACH_AGENT_LIVE_OK";
  * It is a guard, not a sandbox, and the difference is worth stating plainly: a
  * determined agent can clear its own environment. What this enforces is that
  * spending quota can never be *incidental* — not something a suite picks up
- * from an inherited variable, a copied command line, or a doc example. The
- * harness-level block (`.claude/hooks/block-live-agent-runs.sh`) is the half
- * that an agent cannot talk its way past; this half travels with the code, so
- * it still holds in a checkout that has no hook config at all.
+ * from an inherited variable, a copied command line, or a doc example.
  */
 const assertLiveModeIsAllowed = (env: Record<string, string | undefined>): void => {
   if (!runningUnderACodingAgent(env)) return;

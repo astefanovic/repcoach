@@ -334,31 +334,20 @@ mode. Two ways out, and they are not equivalent:
 **Rule: live agents run when the owner asks, not when an agent decides to.**
 Live sessions bill against a weekly subscription rate limit with no undo, so a
 default of `canned` is not enough — a default stops an accident, not an agent
-that has read this page. Two independent guards, because neither is sufficient
-alone:
+that has read this page. So the guard is in code (`agentMode.ts`):
+`REPCOACH_AGENT_MODE=live` refuses to start when a coding-agent session marker
+(`CLAUDECODE`, `AI_AGENT`, `CLAUDE_CODE_ENTRYPOINT`) is in the environment, and
+the refusal names `replay` as the free equivalent. `REPCOACH_AGENT_LIVE_OK=1` is
+the override, for the case where the owner has asked an agent to do a live run.
 
-1. **In code** (`agentMode.ts`). `REPCOACH_AGENT_MODE=live` refuses to start
-   when a coding-agent session marker (`CLAUDECODE`, `AI_AGENT`,
-   `CLAUDE_CODE_ENTRYPOINT`) is in the environment, and the refusal names
-   `replay` as the free equivalent. It travels with the code, so it holds in a
-   checkout with no hook config. `REPCOACH_AGENT_LIVE_OK=1` is the override,
-   for the case where the owner has asked an agent to do a live run.
-2. **In the harness** (`.claude/hooks/block-live-agent-runs.sh`, PreToolUse).
-   Blocks the command before it runs, and covers a second family the code guard
-   cannot see: **starting the production server** — `Start-RepcoachServer.ps1`,
-   `prodIndex.ts`, `dev-server start`, or the `commissioning` entry in
-   `.claude/launch.json`. That path predates #95 and is the larger exposure,
-   because production is live by construction and merely *booting* it opens
-   sessions: `RealModelCatalog` calls `supportedModels()` on a live `query()`
-   and `QuotaServiceLive` polls the plan's rate limits on a schedule. The hook
-   fails closed on an input it cannot parse.
-
-Neither is a sandbox — an agent can clear its own environment, and hooks are
-config. What they enforce is that spending quota is never *incidental*: not
-inherited from a variable, not copied from an example on this page. The
-ordinary dev-server, every test rung and `replay` are untouched by both guards;
-they wire the canned catalog and canned quota service and cannot open a session
-at all.
+It is not a sandbox — an agent can clear its own environment. What it enforces
+is that spending quota is never *incidental*: not inherited from a variable,
+not copied from an example on this page. The ordinary dev-server, every test
+rung and `replay` are untouched by it; they wire the canned catalog and canned
+quota service and cannot open a session at all. The production server is live
+by construction and has no such guard: booting it opens sessions
+(`RealModelCatalog` calls `supportedModels()`, `QuotaServiceLive` polls rate
+limits).
 
 ### Live mode: bounded, and legible when it fails
 

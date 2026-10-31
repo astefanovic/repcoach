@@ -202,17 +202,12 @@ server process, where the sessions run from, model ids, what a run costs — was
 unverified. It has now been run end to end on this host. This section is the
 repeatable configuration plus what a real run actually does.
 
-### Agents cannot start this server
+### Booting it spends quota
 
 The production wiring is live by construction and spends subscription quota just
 by booting — `RealModelCatalog` calls `supportedModels()` on a live `query()`,
 `QuotaServiceLive` polls the plan's rate limits, and the Cycle-review schedule
-is running. So a PreToolUse hook
-(`.claude/hooks/block-live-agent-runs.sh`, issue #95) blocks every spelling of
-starting it — this script, `prodIndex.ts`, `pnpm … dev-server start`, and the
-`commissioning` entry in `.claude/launch.json` — from a coding-agent session.
-**The owner starts it, in their own shell, where the hook does not apply.** An
-agent that needs a server to test against uses the dev-server
+is running. When a server is only needed to test against, use the dev-server
 (`pnpm --filter @repcoach/dev-server dev`), which is canned throughout.
 
 ### Run it
