@@ -146,6 +146,7 @@ export const RPC_METHODS = {
   applyUserPlanChange: "plan.applyUserChange",
   runDeliberationNow: "deliberation.runNow",
   runCycleReview: "deliberation.runCycleReview",
+  retryPendingReviews: "deliberation.retryPendingReviews",
   setCadenceModel: "settings.setCadenceModel",
   getCadenceModel: "settings.getCadenceModel",
   listModels: "settings.listModels",
@@ -520,6 +521,22 @@ export const RunCycleReviewRpc = Rpc.make(RPC_METHODS.runCycleReview, {
 });
 
 /**
+ * "Retry now" on a failed Session review (#132's drain, on demand): starts the
+ * drain at once instead of leaving the user to wait out its poll interval
+ * after fixing whatever broke the run — signing back in, typically.
+ *
+ * Returns as soon as the drain is started, not when the reviews finish: a
+ * review takes minutes, and the Coach rail already shows its progress through
+ * `deliberation.subscribeRuns`. `pending` is how many sessions were owed a
+ * review when it started, so the caller can say "nothing to retry" rather
+ * than show a run that will never appear.
+ */
+export const RetryPendingReviewsRpc = Rpc.make(RPC_METHODS.retryPendingReviews, {
+  payload: Schema.Struct({}),
+  success: Schema.Struct({ pending: Schema.Number }),
+});
+
+/**
  * Per-cadence model settings (ADR 0011 §4, 2B slice 6 — issue #31): persist a
  * model choice per cadence so the frequent Session review and the rare Cycle
  * review can run on different models. The runner reads the persisted value
@@ -836,6 +853,7 @@ export const RepCoachRpcGroup = RpcGroup.make(
   ApplyUserChangeRpc,
   RunDeliberationNowRpc,
   RunCycleReviewRpc,
+  RetryPendingReviewsRpc,
   SetCadenceModelRpc,
   GetCadenceModelRpc,
   ListModelsRpc,

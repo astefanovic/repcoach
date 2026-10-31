@@ -287,6 +287,16 @@ export const RpcHandlersLayer = RepCoachRpcGroup.toLayer(
       // on-demand "run a Cycle review now" (ADR 0002/0011 §4).
       "deliberation.runCycleReview": () => deliberationRunner.runCycleReview,
 
+      // "Retry now" on the Coach rail: the same drain nudge `finishWorkout`
+      // uses, so the retry goes through the runner's claim set and cannot
+      // race the poll tick into reviewing a session twice.
+      "deliberation.retryPendingReviews": () =>
+        Effect.gen(function* () {
+          const pending = yield* store.listSessionsPendingReview;
+          if (pending.length > 0) yield* deliberationRunner.nudgeSessionReviewDrain;
+          return { pending: pending.length };
+        }),
+
       // Per-cadence model settings (ADR 0011 §4, issue #31): persist a model
       // choice per cadence; the runner reads it (`Store.getCadenceModel`) each
       // run and passes it to that cadence's deliberator.

@@ -246,4 +246,46 @@ describe("Session-review drain (issue #132)", () => {
 
     expect(statuses).toEqual(["pending", "pending"]);
   });
+
+  it("Retry now: after a failed review, deliberation.retryPendingReviews reviews it without waiting for the poll tick", async () => {
+    // The login-expiry case: the run failed, the owner fixed the cause, and
+    // the next tick is up to fifteen minutes away. The RPC is the lever that
+    // closes that gap.
+    const [retry, pendingAfter, reviewsAfter] = await Effect.gen(function* () {
+      const client = yield* RpcTest.makeClient(RepCoachRpcGroup);
+      const store = yield* Store;
+      const runner = yield* DeliberationRunner;
+      const { loggedSessionId } = yield* client["session.start"]({
+        prescribedSessionId: "session-seed-1" as never,
+      });
+      yield* client["logging.finishWorkout"]({ loggedSessionId });
+      yield* runner.reviewPendingSessions; // fails
+
+      const retry = yield* client["deliberation.retryPendingReviews"]({});
+
+      // The review runs in the background; wait for it (bounded) rather than
+      // for the RPC, which has already replied.
+      for (let i = 0; i < 200 && (yield* store.listSessionsPendingReview).length > 0; i += 1) {
+        yield* Effect.sleep("5 millis");
+      }
+      return [
+        retry,
+        (yield* store.listSessionsPendingReview).length,
+        sessionReviewCount(yield* store.listDecisionsForTest),
+      ] as const;
+    }).pipe(Effect.provide(makeTestLayer(makeFlakyDeliberationAgent(1))), Effect.scoped, Effect.runPromise);
+
+    expect(retry).toEqual({ pending: 1 });
+    expect(pendingAfter).toBe(0);
+    expect(reviewsAfter).toBeGreaterThan(0);
+  });
+
+  it("Retry now with nothing owed says so and starts no run", async () => {
+    const retry = await Effect.gen(function* () {
+      const client = yield* RpcTest.makeClient(RepCoachRpcGroup);
+      return yield* client["deliberation.retryPendingReviews"]({});
+    }).pipe(Effect.provide(makeTestLayer(FailingDeliberationAgent)), Effect.scoped, Effect.runPromise);
+
+    expect(retry).toEqual({ pending: 0 });
+  });
 });

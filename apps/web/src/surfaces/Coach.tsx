@@ -36,19 +36,27 @@
 //
 // Presentation of a Decision's working is `coachItem.tsx`, shared with Today's
 // card, so an item reads identically in both places.
+//
+// One exception to "no actions here": **Retry now** on a failed Session
+// review. It decides nothing — it re-runs a review the coach still owes — and
+// the failure it answers usually has a fix outside the app (signing Claude
+// back in), after which the only other path was waiting out the drain's poll.
 import { useEffect, useState } from "react";
 
-import type {
-  DecisionKind,
-  DecisionStatus,
-  DeliberationRunDecision,
-  DeliberationRunRecord,
+import {
+  RPC_METHODS,
+  type DecisionKind,
+  type DecisionStatus,
+  type DeliberationRunDecision,
+  type DeliberationRunRecord,
 } from "@repcoach/contracts";
 
 import { seenThrough } from "../runtime/coachActivity.ts";
 import { useCoachLastSeen } from "../runtime/coachLastSeen.ts";
 import { useDecisionWorking } from "../runtime/useDecisionWorking.ts";
 import { useDeliberationRuns } from "../runtime/useDeliberationRuns.ts";
+import { callRpc, describeFailure } from "../runtime/rpc.ts";
+import { useRuntime } from "../runtime/RuntimeProvider.tsx";
 import {
   Kind,
   Provenance,
@@ -59,6 +67,7 @@ import {
   formatSpan,
   plural,
 } from "./coachItem.tsx";
+import { groupRuns, type RunGroup } from "./runGroups.ts";
 
 export function Coach({ offline }: { readonly offline: boolean }) {
   const history = useDeliberationRuns();
@@ -75,6 +84,18 @@ export function Coach({ offline }: { readonly offline: boolean }) {
     if (runsForSeen === undefined) return;
     markSeen(seenThrough(runsForSeen, new Date().toISOString()));
   }, [runsForSeen, markSeen]);
+
+  const groups = history.status === "ready" ? groupRuns(history.runs) : [];
+  // Retry is offered on the newest Session review only when that review
+  // failed and nothing is running: a run in flight is either the retry itself
+  // or will be followed by one, and an older failure that a later review got
+  // past is history, not something still owed.
+  const anyRunning = groups.some((group) => group.run.outcome === "running");
+  const latestReview = groups.find((group) => group.run.cadence === "session-review");
+  const retryable =
+    !offline && !anyRunning && latestReview?.run.outcome === "failed"
+      ? latestReview.run.runId
+      : undefined;
 
   const toggle = (id: string) =>
     setOpen((current) => {
@@ -125,12 +146,13 @@ export function Coach({ offline }: { readonly offline: boolean }) {
         ) : (
           /* The rail: one continuous hairline, run nodes hung off it. */
           <ol className="relative mt-5 ml-2 border-l border-border pl-5">
-            {history.runs.map((run) => (
+            {groups.map((group) => (
               <RunNode
-                key={run.runId}
-                run={run}
-                open={open.has(run.runId)}
-                onToggle={() => toggle(run.runId)}
+                key={group.run.runId}
+                group={group}
+                open={open.has(group.run.runId)}
+                onToggle={() => toggle(group.run.runId)}
+                retryable={retryable === group.run.runId}
               />
             ))}
             <li className="relative pb-2">
@@ -201,14 +223,18 @@ const triggerLabel = (cadence: string): string =>
           : "because you asked for a run";
 
 function RunNode({
-  run,
+  group,
   open,
   onToggle,
+  retryable,
 }: {
-  readonly run: DeliberationRunRecord;
+  readonly group: RunGroup;
   readonly open: boolean;
   readonly onToggle: () => void;
+  readonly retryable: boolean;
 }) {
+  const { run, attempts } = group;
+  const firstAttempt = attempts.at(-1) ?? run;
   const sessionsRead = run.dataWindow?.session_ids_considered.length ?? 0;
   const rawSpan = formatSpan(run.dataWindow?.window_from, run.dataWindow?.window_to);
   // A window that spans the day the run happened on says nothing the timestamp
@@ -224,6 +250,7 @@ function RunNode({
           : "ok";
 
   const meta = [
+    attempts.length > 1 ? `${attempts.length} attempts since ${formatDayTime(firstAttempt.startedAt)}` : undefined,
     sessionsRead > 0 ? `${sessionsRead} read` : undefined,
     window,
     run.dataWindow === undefined ? undefined : `roster ${run.dataWindow.evidence_roster_version}`,
@@ -252,7 +279,8 @@ function RunNode({
             <span className="text-confirm">Deliberating now, {triggerLabel(run.cadence)}.</span>
           ) : run.outcome === "failed" ? (
             <span className="text-danger">
-              Failed{run.failureReason === undefined ? "" : `: ${run.failureReason}`}
+              Failed{attempts.length > 1 ? ` ×${attempts.length}` : ""}
+              {run.failureReason === undefined ? "" : `: ${run.failureReason}`}
             </span>
           ) : run.decisions.length === 0 ? (
             <span className="text-text-muted">
@@ -271,6 +299,8 @@ function RunNode({
           {meta.join(" · ")}
         </span>
       </button>
+
+      {retryable && <RetryReview />}
 
       {open && (
         <div className="mt-3">
@@ -293,6 +323,11 @@ function RunNode({
 
           {run.outcome === "failed" && (
             <p className="mt-3 text-sm leading-snug text-text-muted">
+              {attempts.length > 1
+                ? formatDayTime(firstAttempt.startedAt) === formatDayTime(run.startedAt)
+                  ? `Tried ${attempts.length} times at ${formatDayTime(run.startedAt)}. `
+                  : `Tried ${attempts.length} times between ${formatDayTime(firstAttempt.startedAt)} and ${formatDayTime(run.startedAt)}. `
+                : ""}
               Nothing was recorded and your plan is unchanged.
             </p>
           )}
@@ -303,6 +338,48 @@ function RunNode({
         </div>
       )}
     </li>
+  );
+}
+
+/**
+ * Re-runs the Session reviews still owed, now rather than at the drain's next
+ * poll. The new run appears at the top of the rail through the runs
+ * subscription, which also hides this (a run is in flight), so the only states
+ * it has to say out loud are the ones where no run is coming.
+ */
+function RetryReview() {
+  const runtime = useRuntime();
+  const [state, setState] = useState<
+    { readonly status: "idle" | "pending" } | { readonly status: "said"; readonly text: string }
+  >({ status: "idle" });
+
+  const retry = () => {
+    setState({ status: "pending" });
+    callRpc(runtime, RPC_METHODS.retryPendingReviews, {}).then(
+      ({ pending }) =>
+        setState(
+          pending === 0
+            ? { status: "said", text: "Nothing is waiting for a review any more." }
+            : { status: "idle" },
+        ),
+      (cause: unknown) =>
+        setState({ status: "said", text: `Could not retry — ${describeFailure(cause)}` }),
+    );
+  };
+
+  return (
+    <div className="mt-2 flex flex-wrap items-baseline gap-3">
+      <button
+        onClick={retry}
+        disabled={state.status === "pending"}
+        className="rounded-control border border-border-strong px-2.5 py-1 font-numeric text-[0.625rem] tracking-widest uppercase active:bg-surface-sunken disabled:text-text-faint"
+      >
+        {state.status === "pending" ? "Retrying…" : "Retry now"}
+      </button>
+      {state.status === "said" && (
+        <span className="text-sm leading-snug text-text-muted">{state.text}</span>
+      )}
+    </div>
   );
 }
 
