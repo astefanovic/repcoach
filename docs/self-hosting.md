@@ -66,7 +66,7 @@ here.
 
 ```sh
 git clone https://github.com/astefanovic/repcoach.git
-cd repcoach/thin-client
+cd repcoach
 pnpm install
 pnpm repcoach install
 ```
@@ -108,7 +108,7 @@ with the Windows setup.
 
 ### From a terminal
 
-| Command (from `thin-client/`) | What it does |
+| Command (repo root) | What it does |
 |---|---|
 | `pnpm repcoach install` | Start (or reuse) the server and open Settings, paired. |
 | `pnpm repcoach start` | Run the server in the foreground. What the service runs. |
@@ -120,14 +120,14 @@ with the Windows setup.
 ## Configuration
 
 All settings are environment variables, documented on
-`thin-client/apps/dev-server/src/productionMain.ts`.
+`apps/server/src/hosting/productionMain.ts`.
 
 | Variable | Default | What it does |
 |---|---|---|
 | `PORT` | `4020` | TCP port. |
 | `HOST` | `127.0.0.1` | Bind address. Leave it on loopback and let Tailscale Serve front it. |
 | `REPCOACH_DB_PATH` | `~/.repcoach/repcoach.sqlite` | The database. Beside it: the pairing secret, `<db>.auth.json` (paired devices), `<db>.runtime.json` and `logs/`. |
-| `REPCOACH_STATIC_DIR` | `thin-client/apps/web/dist` | The built web client. If missing, the server serves `/rpc` only. |
+| `REPCOACH_STATIC_DIR` | `apps/web/dist` | The built web client. If missing, the server serves `/rpc` only. |
 | `REPCOACH_AGENT_CWD` | `~/.repcoach/agent-workdir` | Where agent sessions run from. The server refuses the repo and the database's own directory. |
 | `REPCOACH_TAILSCALE_SERVE` | on | `0` leaves Tailscale Serve alone. |
 | `REPCOACH_TAILSCALE_SERVE_PORT` | `443` | The HTTPS port Serve publishes on. A second server on the same machine uses another one. |
@@ -150,7 +150,6 @@ URL alone.
 
 ```sh
 git pull
-cd thin-client
 pnpm install
 ```
 

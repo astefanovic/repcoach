@@ -61,10 +61,10 @@ phone browser ──(Tailscale)──> home server (Node)
 
 | Path | What |
 |---|---|
-| `thin-client/apps/web` | The web client (Vite + React). |
-| `thin-client/apps/dev-server` | The server: RPC, static hosting, and the agent runners. `src/prodIndex.ts` is the production entrypoint, `src/index.ts` the dev/test server. |
-| `thin-client/packages/` | Shared contracts, the client runtime, and SQLite persistence. |
-| `thin-client/e2e` | Playwright acceptance specs. |
+| `apps/web` | The web client (Vite + React). |
+| `apps/server` | The server: RPC, static hosting, pairing, Tailscale and the agent runners. `src/hosting/cli.ts` is the production entrypoint (`pnpm repcoach …`), `src/devMain.ts` the canned dev/test server. |
+| `packages/` | Shared contracts, the client runtime, and SQLite persistence. |
+| `e2e` | Playwright acceptance specs. |
 | `scripts/` | Windows helpers that start the server and keep it running. |
 
 ## Requirements
@@ -86,10 +86,9 @@ The dev server runs canned (scripted) agents, so you can click through
 everything, the coach included, with no Claude login:
 
 ```sh
-cd thin-client
 pnpm install
-pnpm --filter @repcoach/dev-server dev     # RPC on http://localhost:4010
-pnpm --filter @repcoach/web dev            # web client on http://localhost:5173
+pnpm --filter @repcoach/server dev   # RPC on http://localhost:4010
+pnpm --filter @repcoach/web dev      # web client on http://localhost:5173
 ```
 
 Open <http://localhost:5173>. Each dev-server boot starts a fresh throwaway
@@ -98,7 +97,6 @@ database seeded with a demo plan, so nothing you log there is kept.
 ### Run it for real
 
 ```sh
-cd thin-client
 pnpm install
 pnpm repcoach install
 ```
@@ -141,7 +139,6 @@ Details are in [docs/self-hosting.md](docs/self-hosting.md#security).
 ## Development
 
 ```sh
-cd thin-client
 pnpm test          # Vitest (unit + integration)
 pnpm typecheck
 pnpm --filter @repcoach/e2e test   # Playwright e2e; boots its own servers

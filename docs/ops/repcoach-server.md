@@ -3,7 +3,7 @@
 **Audience: the next agent (or human) touching the always-on home-server setup.**
 This is the single explainer for how the phone-facing production deployment
 works, every non-obvious decision in it, and the traps that already bit us.
-Read this before changing anything under `thin-client/apps/dev-server`,
+Read this before changing anything under `apps/server`,
 `scripts/*.ps1`, or the web build. The owner-facing walkthrough is
 [`docs/self-hosting.md`](../self-hosting.md); the decision is
 [ADR 0024](../adr/0024-the-server-owns-its-own-exposure-and-devices-pair.md).
@@ -24,9 +24,15 @@ phone browser ──(tailnet, https)──> tailscale serve ──> production s
    ↳ ~/.repcoach/: repcoach.sqlite · server-secret · repcoach.auth.json · repcoach.runtime.json · logs/
 ```
 
-| File (`apps/dev-server/src/`) | Role |
+`apps/server/src/` is grouped by concern: `agents/` (the Agent SDK sessions and
+their transports), `deliberation/` (runners, snapshot, schedules), `hosting/`
+(everything below) and `testing/` (the dev-server's control channel). The RPC
+wiring (`server.ts`, `rpcHandlers.ts`, `store.ts`) and the two entrypoints'
+neighbours stay at the top.
+
+| File (`apps/server/src/hosting/`) | Role |
 |---|---|
-| `productionMain.ts` | Boots everything below; env config. `prodIndex.ts` and `cli.ts` both call it. |
+| `productionMain.ts` | Boots everything below; env config. Called by `cli.ts`. |
 | `cli.ts` | `pnpm repcoach install / start / pair / status`. Rebuilds a stale web client before starting. |
 | `serverAuth.ts` | Pairing codes (HMAC, one use, 15 min) and hashed sessions. |
 | `serverAdmin.ts` | The auth gate (`HttpRouter.serve` middleware, so it sees WebSocket upgrades) and the admin routes. |
@@ -135,7 +141,6 @@ gone.
 ## Verification checklist (after any change here)
 
 ```powershell
-cd thin-client
 pnpm test                         # every unit/integration suite
 pnpm -w exec tsc -b               # typecheck (warm; TS6310 on a cold cache is a known quirk)
 pnpm --filter @repcoach/e2e test  # Playwright; clear ports 4010/4011/5173/5174 first
@@ -177,7 +182,7 @@ The production wiring is live by construction and spends subscription quota just
 by booting — `RealModelCatalog` calls `supportedModels()` on a live `query()`,
 `QuotaServiceLive` polls the plan's rate limits, and the Cycle-review schedule
 is running. When a server is only needed to test against, use the dev-server
-(`pnpm --filter @repcoach/dev-server dev`), which is canned throughout.
+(`pnpm --filter @repcoach/server dev`), which is canned throughout.
 
 ### Run it
 
@@ -191,7 +196,7 @@ is running. When a server is only needed to test against, use the dev-server
 Add `-Open` to have it open this machine's browser already paired; otherwise
 the page asks to pair, and a link comes from the same settings:
 `$env:REPCOACH_DB_PATH = "$env:USERPROFILE\.repcoach\commissioning.sqlite"; pnpm repcoach pair`
-(from `thin-client/`). Then go to `/intake` and drive: draft → answer the
+(from the repo root). Then go to `/intake` and drive: draft → answer the
 coach's question → **Review the sources** → **Accept**. Finish a session from
 Today to fire a live Session review. `.claude/launch.json`'s `commissioning`
 entry is the same thing for the Browser pane — open the `pair` link there.
@@ -247,7 +252,7 @@ request, not a model turn, so it spends no quota.
 `.github/workflows/agent-sdk-update.yml` does the upkeep every Monday. It
 moves to the newest SDK release that is at least a day old, which is pnpm's
 `minimumReleaseAge`, so no exclusions are needed
-(`thin-client/scripts/bump-agent-sdk.mjs`). It then runs typecheck, vitest
+(`scripts/bump-agent-sdk.mjs`). It then runs typecheck, vitest
 and the `@agents` replay specs, and commits to master if they pass. **The
 running server only picks up the new SDK after your next pull, `pnpm install`
 and restart.**
@@ -277,7 +282,7 @@ written there as a replay cassette — the refresh path for rung 2a's fixtures
 server does not write transcripts of its own runs to disk unless asked.
 
 ```powershell
-$env:REPCOACH_AGENT_RECORD_DIR = "$PWD\thin-client\e2e\fixtures\agent-cassettes"
+$env:REPCOACH_AGENT_RECORD_DIR = "$PWD\e2e\fixtures\agent-cassettes"
 # same THROWAWAY-db posture as the commissioning run above
 ./scripts/Start-RepcoachServer.ps1 -Port 4031 -SkipTailscaleServe `
   -DbPath $env:USERPROFILE\.repcoach\commissioning.sqlite

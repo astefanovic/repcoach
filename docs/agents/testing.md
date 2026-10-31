@@ -5,8 +5,8 @@ rung below it is green.
 
 | Rung | What | Tool | Runs on | Who writes it |
 |------|------|------|---------|---------------|
-| 1. Unit / integration | Behavior at code seams | **Vitest** (`thin-client/`) | Node | Implementer, via `/tdd` |
-| 2. E2E acceptance | User journeys, black-box | **Playwright** (`thin-client/e2e/`) | Browser (Chromium) | **Adversarial author agent** |
+| 1. Unit / integration | Behavior at code seams | **Vitest** | Node | Implementer, via `/tdd` |
+| 2. E2E acceptance | User journeys, black-box | **Playwright** (`e2e/`) | Browser (Chromium) | **Adversarial author agent** |
 | 2a. Agent-backed e2e | The same journeys, against the **real agents** — replayed or live | Playwright, `REPCOACH_AGENT_MODE` | Browser (Chromium) | Implementer (#95) |
 | 3. UAT | Real build, real hardware | Open the served URL | Phone browser over Tailscale | Human |
 
@@ -36,8 +36,8 @@ read and by review of the diff, not by the tool.
 
 - **Author agent (adversarial).** Input: the feature's issue / spec (the *behavior*)
   and the app's visible vocabulary — headings, button labels, empty-state copy. It
-  is **forbidden to read the client source** under `thin-client/apps/web/src/**`
-  (and `thin-client/packages/**`). Output: Playwright specs in `thin-client/e2e/flows/`
+  is **forbidden to read the client source** under `apps/web/src/**`
+  (and `packages/**`). Output: Playwright specs in `e2e/flows/`
   that encode "a user can do X and observe Y."
 - **Implementer agent.** Full source access. Writes the app code (its own inner
   `/tdd` unit loop) to make those specs pass.
@@ -46,11 +46,11 @@ read and by review of the diff, not by the tool.
 
 1. Author writes a spec from the issue. It is **red** — the feature doesn't exist
    yet (`pnpm --filter @repcoach/e2e test flows/<new>.spec.ts`, run from
-   `thin-client/`). No `--` before the path: pnpm hands a literal `--` on to
+   the repo root). No `--` before the path: pnpm hands a literal `--` on to
    Playwright, which then ignores the path and runs the whole suite.
 2. Implementer builds the feature until the spec is **green**.
 3. Repeat per journey. The feature is done when the whole suite is green:
-   `pnpm --filter @repcoach/e2e test` (from `thin-client/`), which boots the
+   `pnpm --filter @repcoach/e2e test`, which boots the
    dev-server and the Vite client itself via Playwright's `webServer` config —
    no server needs to be started by hand first.
 
@@ -61,10 +61,10 @@ user-observable behavior, not a test shaped around the implementation.
 
 Spawn the author as a subagent whose prompt (a) hands it the issue text plus the
 current visible-string inventory (headings, labels, empty states — read these off
-`thin-client/apps/web/src/surfaces/**` component output or by running the app, not
+`apps/web/src/surfaces/**` component output or by running the app, not
 by reading the components themselves), (b) explicitly forbids reading
-`thin-client/apps/web/src/**` and `thin-client/packages/**`, and (c) restricts its
-writes to `thin-client/e2e/flows/`. If you can't hard-sandbox the tools, the
+`apps/web/src/**` and `packages/**`, and (c) restricts its
+writes to `e2e/flows/`. If you can't hard-sandbox the tools, the
 forbiddance in the prompt plus review of the diff (specs only, no source reads) is
 the contract.
 
@@ -92,7 +92,7 @@ the contract.
   `innerText` shows `[SUPERSET]` after the *previous* Entry's rows. Read
   `GET /__test__/plan` when the claim is about grouping.
 - Use the dev-server's `/__test__/*` HTTP control channel (see
-  `thin-client/apps/dev-server`) as the external lever for setup/teardown and for
+  `apps/server`) as the external lever for setup/teardown and for
   verifying server-side state (e.g. `GET /__test__/logged-actuals`) — never a
   client-side hook. When a state is too *fast* to observe rather than merely
   hard to reach, the lever still belongs on the server: `hold-deliberation` /
@@ -101,7 +101,7 @@ the contract.
   lock and its queued-vs-running spinner would otherwise flicker past unseen.
   `POST /__test__/reset` restores every lever and **abandons** anything still in
   flight, so a flow that dies mid-hold cannot wedge the next one.
-- Use `setOffline` from `thin-client/e2e/driver.ts` (a CDP-backed toggle) for the
+- Use `setOffline` from `e2e/driver.ts` (a CDP-backed toggle) for the
   offline/G1/G2 flows rather than simulating network state some other way.
 - Keep specs independent; any spec must pass run in isolation.
 
@@ -123,7 +123,7 @@ is "my merge broke something distant." Both send you somewhere real work isn't.
 failing this way and passing immediately against a fresh server.
 
 ```powershell
-# from thin-client/ — clear the ports, then run
+# from  — clear the ports, then run
 Get-NetTCPConnection -State Listen -LocalPort 4010,4011,5173,5174 -ErrorAction SilentlyContinue |
   ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
 pnpm --filter @repcoach/e2e test
@@ -192,7 +192,7 @@ placeholder assertions #39 left behind are gone.
 | `agent-backed-intake.spec.ts` | **`@agents`, opt-in** — the same Intake journey against the REAL adapters, replayed or live (#95). Skipped in canned mode |
 
 **Intake needs a coach, so the dev-server has one.** `CannedIntakeSessionAgent`
-(`apps/dev-server/src/intakeSessionAgent.ts`) replaced the deliberately-unwired
+(`apps/server/src/agents/intakeSessionAgent.ts`) replaced the deliberately-unwired
 agent in #82: with nothing wired, every path past the form was unreachable from
 a browser, so the one flow a new user cannot skip was the one flow nothing
 tested. It is deterministic and a function of the whole transcript, and it is
@@ -248,7 +248,7 @@ suite changes.
 | `live` | the real adapters, real Agent SDK sessions | no | **yes** |
 
 ```powershell
-# from thin-client/e2e — replay: real adapters, recorded transcripts, free
+# from e2e — replay: real adapters, recorded transcripts, free
 $env:REPCOACH_AGENT_MODE='replay'; pnpm --filter @repcoach/e2e test --grep '@agents'
 ```
 
@@ -285,7 +285,7 @@ adversarial-author constraint is untouched — these assert what a user sees.
 ### What replay actually catches, and where
 
 Most of the value is in **rung 1**, not rung 2:
-`apps/dev-server/src/agentCassette.contract.test.ts` pushes every committed
+`apps/server/src/agents/agentCassette.contract.test.ts` pushes every committed
 cassette through its real adapter on every commit. Tighten a contract, rename a
 wire field, or delete one of the decode-boundary absorbers #93 added, and it
 goes red in seconds — including for the deliberator and the sweep, which no
@@ -295,7 +295,7 @@ cheap one.
 
 ### The fixtures, and refreshing them
 
-Cassettes live in `thin-client/e2e/fixtures/agent-cassettes/` — one file per
+Cassettes live in `e2e/fixtures/agent-cassettes/` — one file per
 session, handed out per stage in filename order. See that directory's
 `README.md`; the short version is that the committed ones are **hand-seeded**,
 reproducing the deviations #93 recorded live (`"citationId": null`, omitted
@@ -307,7 +307,7 @@ recording directory and driving the journey by hand:
 
 ```powershell
 # a THROWAWAY db — a recording run writes genuine rows (see docs/ops/repcoach-server.md)
-$env:REPCOACH_AGENT_RECORD_DIR="$PWD\thin-client\e2e\fixtures\agent-cassettes"
+$env:REPCOACH_AGENT_RECORD_DIR="$PWD\e2e\fixtures\agent-cassettes"
 ./scripts/Start-RepcoachServer.ps1 -Port 4031 -SkipTailscaleServe -DbPath $env:USERPROFILE\.repcoach\commissioning.sqlite
 ```
 
@@ -322,7 +322,7 @@ asking, and the fixture rotting quietly is record-and-replay's known failure
 mode. Two ways out, and they are not equivalent:
 
 - **Re-record** (above). The honest answer.
-- `pnpm --filter @repcoach/dev-server cassettes:restamp` — restamps without
+- `pnpm --filter @repcoach/server cassettes:restamp` — restamps without
   re-recording. Only for a prompt change that provably cannot invalidate the
   reply (a typo, a reordered paragraph). This is the one tool in the repo that
   can cause the silent rot the fingerprint exists to prevent.
@@ -385,7 +385,7 @@ that URL in the phone's browser over Tailscale and using the app for real.
 
 ```powershell
 # Ensure the server is up — or `pnpm repcoach status` if the background service runs it:
-cd thin-client; pnpm repcoach install
+pnpm repcoach install
 ```
 
 Then, on the phone, open the tailnet URL shown in Settings → Server. A phone that
@@ -398,8 +398,8 @@ Pair a device (or `pnpm repcoach pair`). No adb, no wireless-debugging setup.
 
 - **Node 22+** — see the thin-client-node-runtime memory note for the portable
   Node used on this machine (system Node lacks `node:sqlite`).
-- **pnpm** — the thin-client workspace (`thin-client/`) is a pnpm workspace;
-  install deps with `pnpm install` from `thin-client/`.
+- **pnpm** — the repo root is a pnpm workspace; install deps with
+  `pnpm install` there.
 - **Playwright browsers** — `pnpm --filter @repcoach/e2e exec playwright install`
   (Chromium only is exercised by the current suite) if a fresh machine reports
   missing browser binaries.
@@ -409,13 +409,13 @@ Pair a device (or `pnpm repcoach pair`). No adb, no wireless-debugging setup.
 ### Commands
 
 ```powershell
-# from thin-client/
+# from 
 pnpm test                                     # rung 1 — full Vitest suite
 pnpm test:watch                               # rung 1 — watch mode
 pnpm --filter @repcoach/e2e test              # rung 2 — full suite (canned; clear ports first)
 pnpm --filter @repcoach/e2e test flows/<file>.spec.ts  # rung 2 — one spec file (no `--`)
 $env:REPCOACH_AGENT_MODE='replay'             # rung 2a — real adapters, recorded
 pnpm --filter @repcoach/e2e test --grep '@agents'      # ...and ONLY the @agents specs
-pnpm --filter @repcoach/dev-server cassettes:restamp   # after a safe prompt edit
+pnpm --filter @repcoach/server cassettes:restamp   # after a safe prompt edit
 pnpm repcoach install                         # rung 3 — serve for UAT, opens Settings → Server
 ```

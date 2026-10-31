@@ -8,7 +8,7 @@ This is the minimal seed **floor** the coach cites into — not the primary evid
 
 **To change a seated entry**, edit here and in the JSON twin together, and say in the commit which clause moved and what evidence moved it. The bar in ADR 0003 §2 — a seat must carry the whole claim — applies to every edit, not just the original authoring.
 
-Machine-readable twin: [`evidence-base-seed.json`](evidence-base-seed.json). The two must be kept in sync; the JSON is what the store **actually loads** — `thin-client/packages/persistence/src/evidenceSeed.ts` reads it directly (issue #87), so an edit there reaches every fresh database's roster with no code change, and this prose twin is the reviewed record of why each entry reads as it does.
+Machine-readable twin: [`evidence-base-seed.json`](evidence-base-seed.json). The two must be kept in sync; the JSON is what the store **actually loads** — `packages/persistence/src/evidenceSeed.ts` reads it directly (issue #87), so an edit there reaches every fresh database's roster with no code change, and this prose twin is the reviewed record of why each entry reads as it does.
 
 ## Inclusion test
 

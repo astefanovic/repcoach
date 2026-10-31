@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
   Start the RepCoach server in this window. A thin wrapper over
-  `pnpm repcoach start` (thin-client/apps/dev-server/src/cli.ts), kept so the
+  `pnpm repcoach start` (apps/server/src/hosting/cli.ts), kept so the
   NSSM/Scheduled Task scripts and old launchers keep working.
 
 .DESCRIPTION
@@ -14,7 +14,7 @@
   - there is no plain-http fallback any more: if Serve is not working the
     server stays on loopback and Settings says what to fix.
 
-  For first-time setup prefer `pnpm repcoach install` (from thin-client/): it
+  For first-time setup prefer `pnpm repcoach install` (from ): it
   starts the server and opens Settings, where the background service is one
   button.
 
@@ -51,7 +51,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$workspaceRoot = Join-Path (Split-Path -Parent $PSScriptRoot) "thin-client"
+$workspaceRoot = Split-Path -Parent $PSScriptRoot
 
 if ($RequireHttps) { Write-Warning "-RequireHttps is retired: the server never falls back to plain http any more." }
 if ($PortableNodeDir) { Write-Warning "-PortableNodeDir is retired: the server binds loopback only, so the firewall no longer matters." }

@@ -29,14 +29,14 @@ Follow the file's own entry shape (question → watch for → two fallbacks → 
 
 ### Testing & UAT
 
-Three rungs, each gating the next: unit/integration (`/tdd`, Vitest in
-`thin-client/`) → e2e acceptance (Playwright specs in `thin-client/e2e/flows/`,
+Three rungs, each gating the next: unit/integration (`/tdd`, Vitest)
+→ e2e acceptance (Playwright specs in `e2e/flows/`,
 written by an **adversarial author agent forbidden to read
-`thin-client/apps/web/src/**`**, run headless against Chromium) → human UAT by
+`apps/web/src/**`**, run headless against Chromium) → human UAT by
 opening the served URL on the phone browser over Tailscale. See
 `docs/agents/testing.md`.
 
-- `pnpm --filter @repcoach/e2e test` (from `thin-client/`) — boots the dev-server
+- `pnpm --filter @repcoach/e2e test` — boots the dev-server
   and the web client itself and runs the full Playwright suite (final piece of
   automated verification).
 - `REPCOACH_AGENT_MODE=replay` turns the **`@agents` specs** onto the real agent
@@ -53,7 +53,7 @@ opening the served URL on the phone browser over Tailscale. See
   `live` refuses to start from a coding-agent session unless
   `REPCOACH_AGENT_LIVE_OK=1` is set; prefer `replay` and the canned dev-server
   when a real run isn't the point.
-- `pnpm repcoach install` (from `thin-client/`) — serves the built web client for
+- `pnpm repcoach install` — serves the built web client for
   final UAT and opens Settings → Server, where phone access, pairing and the
   background service live; the phone opens the tailnet URL once paired. Run
   only after e2e is green.

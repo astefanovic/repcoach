@@ -1,9 +1,0 @@
-node_modules/
-dist/
-.expo/
-.expo-shared/
-web-build/
-*.tsbuildinfo
-playwright-report/
-test-results/
-.turbo/

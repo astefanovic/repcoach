@@ -3,7 +3,7 @@
 # owns that mapping; see docs/ops/repcoach-server.md → *Models*.
 #
 # Weekly: bump to the newest SDK release that is at least a day old
-# (thin-client/scripts/bump-agent-sdk.mjs), run the automated rungs that
+# (scripts/bump-agent-sdk.mjs), run the automated rungs that
 # don't need a browser on the phone — typecheck, vitest, and the @agents
 # replay specs that drive the real agent adapters — and, if all pass, commit
 # straight to master. There is no PR: repo settings keep GITHUB_TOKEN from
@@ -40,9 +40,6 @@ jobs:
   bump:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    defaults:
-      run:
-        working-directory: thin-client
     env:
       DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
     steps:
@@ -60,7 +57,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: thin-client/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Pick the newest SDK release at least a day old
         id: bump
@@ -91,7 +88,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/dev-server/package.json pnpm-lock.yaml pnpm-workspace.yaml
+          git add apps/server/package.json pnpm-lock.yaml pnpm-workspace.yaml
           git commit -m "Bump Agent SDK ${{ steps.bump.outputs.current }} -> ${{ steps.bump.outputs.target }}" \
             -m "Automated by .github/workflows/agent-sdk-update.yml after typecheck, vitest and the @agents replay specs passed."
           git push origin HEAD:master

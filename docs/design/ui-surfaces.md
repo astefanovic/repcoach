@@ -32,7 +32,7 @@ Platform: **plain React web app**, phone-first, local-first (offline-tolerant). 
 
 ### Settled by the prototype ([#63](https://github.com/astefanovic/repcoach/issues/63))
 
-Built at 412×915 (Pixel 7) inside the #42 chrome. Reference build: `thin-client/apps/web/src/prototype/spec/Logging.tsx`.
+Built at 412×915 (Pixel 7) inside the #42 chrome. Reference build: `apps/web/src/prototype/spec/Logging.tsx`.
 
 - **The rest timer is a pill pinned to the BOTTOM of the surface, not a band under the header.** The earlier take hung it directly below the status strip, putting two coloured single-line bands within ~24px of each other carrying unrelated meanings — system state (yellow, offline) and workout state (green, resting). Rest now sits at the opposite end from the strip, in the thumb arc, floating over content instead of pushing it, with the countdown draining *inside* the pill so the colour stays confined to one object. When neither the Set nor its Entry prescribes rest, the pill never appears.
 - **There is no reps/load pair anywhere in the rendering code.** The set row is a map over the Exercise catalog's declared metrics. A Plank renders one duration field, a Farmer's Carry renders load + distance, a Pull-up renders reps alone. This is the mechanism, not a special case.
@@ -75,7 +75,7 @@ The one "+" sheet item (above) that is not a Set: free text against the Entry, r
 
 **Offline says so.** The record is online-only (ADR 0002/0008): disconnected, it states that the record lives on the home server and cannot be read, rather than presenting the last thing it received as current. It does not show a spinner that will never finish.
 
-Artifacts are `thin-client/apps/web/src/surfaces/Coach.tsx` and `coachItem.tsx` — the latter shared with Today's Proposal card, so an item reads identically in both places and the two cannot drift.
+Artifacts are `apps/web/src/surfaces/Coach.tsx` and `coachItem.tsx` — the latter shared with Today's Proposal card, so an item reads identically in both places and the two cannot drift.
 
 ### Settled by the prototype (the run history)
 
@@ -128,7 +128,7 @@ Making those sayable is a **data** change, not a presentation one: the Deliberat
 
 ### Settled by the prototype ([#45](https://github.com/astefanovic/repcoach/issues/45))
 
-Reference build: `thin-client/apps/web/src/prototype/spec/Plan.tsx`.
+Reference build: `apps/web/src/prototype/spec/Plan.tsx`.
 
 - **You author set GROUPS, not set rows.** `4 × 5–8 reps @ 80 kg` is one object with a count. ADR 0007's "N identical sets" sugar is promoted from a convenience to *the* authoring unit — it is the only way nested set editing fits at 412px, and it is how a person says it out loud. Tapping the sentence expands it into sets / metric targets / rest / effort. A group of count 1 is just a set. **Logging expands groups into rows; the Plan never sees rows.**
 - **Reordering is a mode, not a gesture.** Long-press-drag on a nested list at 412px is undiscoverable and fights the scroll container. A per-list "Reorder" toggle *replaces* each row's affordances with ↑/↓ rather than adding to them, so the resting state carries no arrow noise.
@@ -169,7 +169,7 @@ Full reasoning in [ADR 0014](../adr/0014-intake-one-held-open-run-swept-once.md)
 
 ### Settled by the prototype ([#64](https://github.com/astefanovic/repcoach/issues/64))
 
-Reference build: `thin-client/apps/web/src/prototype/spec/Intake.tsx` (+ `intake-data.ts`), inside `ModeShell` with the strip omitted, with the agent canned and every §8 state staged on `?intake=…`. **Deleted by [#74](https://github.com/astefanovic/repcoach/issues/74)**, which ported the surface onto the real runner — read it at PR #73 if the reasoning at the point of each decision is wanted; the shipped surface is `apps/web/src/intake/IntakeTakeover.tsx` over `@repcoach/client-runtime`'s `Intake` module. Amendments to the section above:
+Reference build: `apps/web/src/prototype/spec/Intake.tsx` (+ `intake-data.ts`), inside `ModeShell` with the strip omitted, with the agent canned and every §8 state staged on `?intake=…`. **Deleted by [#74](https://github.com/astefanovic/repcoach/issues/74)**, which ported the surface onto the real runner — read it at PR #73 if the reasoning at the point of each decision is wanted; the shipped surface is `apps/web/src/intake/IntakeTakeover.tsx` over `@repcoach/client-runtime`'s `Intake` module. Amendments to the section above:
 
 - **It does not read as a chat, and the mechanism is that there is no thread at all.** "Draft as hero, turns attached to it" is achievable two ways, and only one works. Exactly **one open question is ever on screen**, directly under the thing it is about; an answered turn does not become a message, it collapses into a **revision ledger**. Nothing bubbles, nothing alternates left/right, nothing accumulates downward — the scroll position barely moves across four turns, which is the tell. A chat grows; a draft gets revised in place.
 - **The ledger line is what the answer DID TO THE PLAN, not what was said.** "Lower back → RDLs out, hip thrust and leg curl in" is the line; `you answered: Bad lower back` is kept underneath, subordinate. That inversion is the whole not-a-chat argument in one row, and it is why the collapsed ledger is readable as a changelog rather than as a folded transcript.
@@ -206,7 +206,7 @@ Full reasoning in [ADR 0022](../adr/0022-the-coach-glyph-carries-two-signals-a-c
 - **The pip clears on opening `/coach`** (a record surface with no per-item actions — "you opened it" is the only "you saw it" there is), and the "last seen" mark advances to the newest run on the rail, so a strictly newer run re-lights it without any clock-agreement assumption.
 - **The mark is device-local** (`localStorage`, like the in-flight pointer): synchronous to read on first render, cheap to be wrong about. A second device keeps its own mark and its own pip — the accepted cost, with the server-side `coachSeenAt` column as the pre-planned fallback → **uat-watchlist #16**.
 
-Artifacts: `thin-client/apps/web/src/runtime/coachActivity.ts` (pure predicate), `coachLastSeen.ts`, `useCoachActivityPip.ts`; the pip markup is on the Coach slot in `ui/Shell.tsx`'s `Dock`/`Sidebar`.
+Artifacts: `apps/web/src/runtime/coachActivity.ts` (pure predicate), `coachLastSeen.ts`, `useCoachActivityPip.ts`; the pip markup is on the Coach slot in `ui/Shell.tsx`'s `Dock`/`Sidebar`.
 
 ## Settings
 

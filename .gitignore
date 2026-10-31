@@ -1,9 +1,5 @@
 .DS_Store
 
-# Dev server / expo run logs
-thin-client/.devserver.log
-thin-client/.expoweb.log
-
 # Left behind by the retired native Android app (ADR 0012) — build output and
 # a machine-specific SDK path, never source.
 .gradle/
@@ -15,3 +11,10 @@ local.properties
 
 # IDE settings
 .idea/
+
+# Workspace
+node_modules/
+dist/
+*.tsbuildinfo
+playwright-report/
+test-results/

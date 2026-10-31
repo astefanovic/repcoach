@@ -7,7 +7,7 @@
       "runtimeArgs": [
         "-NoProfile",
         "-Command",
-        "& \"$env:APPDATA\\npm\\pnpm.cmd\" --dir thin-client/apps/web dev"
+        "& \"$env:APPDATA\\npm\\pnpm.cmd\" --dir apps/web dev"
       ],
       "port": 5173
     },
@@ -30,7 +30,7 @@
       "runtimeArgs": [
         "-NoProfile",
         "-Command",
-        "& \"$env:APPDATA\\npm\\pnpm.cmd\" --dir thin-client/apps/dev-server dev"
+        "& \"$env:APPDATA\\npm\\pnpm.cmd\" --dir apps/server dev"
       ],
       "port": 4010
     }
